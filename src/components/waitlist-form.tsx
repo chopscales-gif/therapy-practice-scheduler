@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { PARTS_OF_DAY, type ModePreference, type PartOfDay } from "@/lib/practice";
+import { OFFER_WINDOW_MINUTES, PARTS_OF_DAY, type ModePreference, type PartOfDay } from "@/lib/practice";
 import { joinWaitlistAction } from "@/server/actions";
 import type { TherapistOption } from "./booking-flow";
 import { PersonFields, SAMPLE_PERSON } from "./person-fields";
@@ -46,10 +46,10 @@ export function WaitlistForm({ therapists }: { therapists: TherapistOption[] }) 
   if (joined) {
     return (
       <div className="arrive grid gap-5">
-        <div className="rounded-xl bg-good-tint px-5 py-5">
-          <h2 className="font-display text-2xl font-semibold tracking-tight text-good">You are on the waitlist</h2>
+        <div className="border-l-4 border-good bg-good-tint px-5 py-5">
+          <h2 className="font-display text-[1.75rem] font-medium leading-tight text-good">You are on the waitlist</h2>
           <p className="mt-2 leading-relaxed">
-            When a time that fits opens up, we will send you a link. It is held for you for 20 minutes. If you pass, or miss it, you keep your place.
+            When a time that fits opens up, we will send you a link. It is held for you for {OFFER_WINDOW_MINUTES} minutes. If you pass, or miss it, you keep your place.
           </p>
         </div>
         <DemoHint>
@@ -93,7 +93,7 @@ export function WaitlistForm({ therapists }: { therapists: TherapistOption[] }) 
             <label key={part.key} className="choice flex-col px-4 py-2.5">
               <input type="checkbox" className="sr-only" checked={parts.includes(part.key)} onChange={() => setParts(toggle(parts, part.key))} />
               <span className="font-semibold">{part.label}</span>
-              <span className="text-[0.8125rem] text-muted">{part.hint}</span>
+              <span className="choice-note text-[0.8125rem]">{part.hint}</span>
             </label>
           ))}
         </div>

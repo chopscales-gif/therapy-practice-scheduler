@@ -26,28 +26,28 @@ export default async function OutboxPage() {
         Every text message and email the system would have sent, newest first. Nothing leaves this demo. Text messages give a time and a link and
         never say what the appointment is for, so they are safe to arrive on a lock screen.
       </PageHeader>
-      <ul className="grid max-w-3xl gap-3">
+      <ul className="max-w-[68rem] border-t-2 border-ink">
         {messages.map((message) => (
-          <li key={message.id} className="panel px-4 py-4 sm:px-5">
-            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-              <p className="font-semibold">
-                {KIND[message.kind]}{" "}
-                <span className="font-normal text-muted">
-                  by {message.channel === "sms" ? "text" : "email"} to {message.recipientName}
-                </span>
+          <li key={message.id} className="grid grid-cols-[minmax(0,1fr)] gap-x-10 gap-y-3 border-b border-rule py-5 lg:grid-cols-[17rem_minmax(0,1fr)]">
+            <div>
+              <p className="font-display text-xl font-medium leading-tight">{KIND[message.kind]}</p>
+              <p className="mt-1 text-[0.9375rem]">
+                By {message.channel === "sms" ? "text" : "email"} to {message.recipientName}
               </p>
-              <p className="text-[0.8125rem] tabular-nums text-muted">{fmtDateTime(message.createdAt)}</p>
+              <p className="break-all text-[0.875rem] text-muted">{message.recipient}</p>
+              <p className="mt-1 text-[0.875rem] tabular-nums text-muted">{fmtDateTime(message.createdAt)}</p>
             </div>
-            <p className="text-[0.8125rem] text-muted">{message.recipient}</p>
-            {message.subject && <p className="mt-2 font-semibold">{message.subject}</p>}
-            <p className={`mt-2 whitespace-pre-line break-words leading-relaxed ${message.channel === "sms" ? "max-w-md rounded-2xl rounded-bl-sm bg-paper px-4 py-2.5" : ""}`}>
+            <div className="max-w-[40rem]">
+            {message.subject && <p className="mb-2 font-semibold">{message.subject}</p>}
+            <p className={`whitespace-pre-line [overflow-wrap:anywhere] leading-relaxed ${message.channel === "sms" ? "max-w-md rounded-2xl rounded-bl-sm border border-line bg-surface px-4 py-2.5" : ""}`}>
               {message.body}
             </p>
             {message.link && (
-              <Link href={message.link} className="mt-2 inline-block font-semibold text-accent underline">
+              <Link href={message.link} className="mt-1 inline-flex min-h-11 items-center font-semibold text-accent underline">
                 Open the link in this message
               </Link>
             )}
+            </div>
           </li>
         ))}
       </ul>

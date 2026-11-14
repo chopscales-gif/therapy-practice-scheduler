@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActionButton } from "@/components/action-button";
-import { DemoHint, SiteFrame } from "@/components/site";
+import { AppointmentCard, AsideIntro, DemoHint, SiteFrame } from "@/components/site";
 import { MODE_LABEL, OFFER_WINDOW_MINUTES, SESSION_MINUTES } from "@/lib/practice";
-import { countOf, fmtDateTimeLong, fmtTime, minutesBetween } from "@/lib/time";
+import { countOf, fmtDayLong, fmtTime, minutesBetween } from "@/lib/time";
 import { modeForOffer } from "@/lib/waitlist";
 import { respondToOfferAction } from "@/server/actions";
 import { offerByToken } from "@/server/queries";
@@ -28,47 +28,52 @@ export default async function OfferPage({ params }: PageProps<"/offer/[token]">)
   // Someone who asked for either is booked in person unless they asked for video.
   const mode = MODE_LABEL[modeForOffer(entry.mode, therapist.offersVideo)];
   const minutesLeft = Math.max(0, minutesBetween(ctx.now, offer.expiresAt));
+  const gone = offer.status === "declined" || offer.status === "expired";
 
   return (
-    <SiteFrame>
-      <p className="text-muted">Hello {client.name.split(" ")[0]},</p>
-      <h1 className="mt-1 font-display text-4xl font-semibold leading-[1.1] tracking-tight">{HEADING[offer.status]}</h1>
-
-      <dl className="panel mt-6 grid gap-x-8 gap-y-4 px-5 py-5 sm:grid-cols-2">
-        <div>
-          <dt className="text-sm text-muted">When</dt>
-          <dd className="mt-0.5 text-lg font-semibold">{fmtDateTimeLong(opening.startsAt)}</dd>
-          <dd className="text-sm text-muted">{SESSION_MINUTES} minutes, Mountain Time</dd>
-        </div>
-        <div>
-          <dt className="text-sm text-muted">With</dt>
-          <dd className="mt-0.5 text-lg font-semibold">
-            {therapist.name}, {therapist.credentials}
-          </dd>
-          <dd className="text-sm text-muted">{mode}</dd>
-        </div>
-      </dl>
-
-      {offer.status === "sent" && (
+    <SiteFrame
+      aside={
         <>
-          <p className="mt-5 rounded-lg bg-amber-tint px-4 py-3 leading-relaxed text-amber">
-            Held for you until <strong className="font-semibold">{fmtTime(offer.expiresAt)}</strong> ({countOf(minutesLeft, "minute")} from now). After that it goes
-            to the next person waiting.
-          </p>
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-start">
-            <ActionButton action={respondToOfferAction.bind(null, token, "accept")} pendingLabel="Booking">
-              Take this time
-            </ActionButton>
-            <ActionButton action={respondToOfferAction.bind(null, token, "decline")} pendingLabel="Passing" variant="quiet">
-              Pass, and keep my place
-            </ActionButton>
-          </div>
+          <AsideIntro greeting={`Hello ${client.name.split(" ")[0]},`} title={HEADING[offer.status]} />
+          <AppointmentCard
+            className="mt-8 max-w-[26rem]"
+            heading={offer.status === "accepted" ? "Your appointment" : gone ? "No longer held" : "Held for you"}
+            lines={[
+              { label: "Day", value: fmtDayLong(opening.startsAt), struck: gone },
+              { label: "Time", value: fmtTime(opening.startsAt), note: `${SESSION_MINUTES} minutes, Mountain Time`, struck: gone },
+              { label: "With", value: therapist.name, note: therapist.credentials },
+              { label: "Where", value: mode },
+            ]}
+          />
         </>
-      )}
-      {offer.status === "accepted" && <p className="mt-5 leading-relaxed">You are booked. A confirmation with a link to cancel, should you need to, is on its way.</p>}
-      {(offer.status === "declined" || offer.status === "expired") && (
-        <p className="mt-5 leading-relaxed">You are still on the waitlist, in the same place, and will be offered the next time that fits.</p>
-      )}
+      }
+    >
+      <div className="max-w-[40rem]">
+        {offer.status === "sent" && (
+          <>
+            <p className="border-l-4 border-amber bg-amber-tint px-4 py-3 text-[1.0625rem] leading-relaxed">
+              Held for you until <strong className="font-semibold">{fmtTime(offer.expiresAt)}</strong> ({countOf(minutesLeft, "minute")} from now). After
+              that it goes to the next person waiting.
+            </p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-start">
+              <ActionButton action={respondToOfferAction.bind(null, token, "accept")} pendingLabel="Booking">
+                Take this time
+              </ActionButton>
+              <ActionButton action={respondToOfferAction.bind(null, token, "decline")} pendingLabel="Passing" variant="quiet">
+                Pass, and keep my place
+              </ActionButton>
+            </div>
+          </>
+        )}
+        {offer.status === "accepted" && (
+          <p className="text-[1.0625rem] leading-relaxed">You are booked. A confirmation with a link to cancel, should you need to, is on its way.</p>
+        )}
+        {gone && (
+          <p className="text-[1.0625rem] leading-relaxed">
+            You are still on the waitlist, in the same place, and will be offered the next time that fits.
+          </p>
+        )}
+      </div>
 
       <DemoHint className="mt-10">
         {offer.status === "sent" ? (

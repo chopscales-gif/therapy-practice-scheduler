@@ -26,17 +26,17 @@ export function DemoBar({ clock }: { clock: string | null }) {
     });
   }
 
-  const tab = (active: boolean) => `rounded px-3 py-1.5 font-semibold ${active ? "bg-white text-ink" : "text-white/80 hover:text-white"}`;
-  const step = "cursor-pointer rounded border border-white/30 px-2.5 py-1 font-semibold hover:border-white disabled:opacity-60";
+  const tab = (active: boolean) =>
+    `flex min-h-11 items-center rounded-[0.25rem] px-3 font-semibold lg:min-h-9 ${active ? "bg-ink text-white" : "text-ink hover:bg-ink/10"}`;
+  const step = `${BUTTON} disabled:opacity-60`;
 
   return (
-    <div className="demo-chrome bg-ink text-sm text-white">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-5 gap-y-2 px-4 py-2 sm:px-6">
+    <div className="demo-chrome border-b border-dashed border-amber bg-amber-tint text-sm text-ink">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 px-4 py-2 sm:px-6">
         <p className="min-w-0 flex-1 basis-64 leading-snug">
-          <strong className="font-semibold">Demonstration build.</strong>{" "}
-          <span className="text-white/75">A fictional practice with invented people. Nothing is sent.</span>
+          <strong className="font-semibold">Demonstration build.</strong> A fictional practice with invented people. Nothing is sent.
         </p>
-        <nav aria-label="Demo view" className="flex items-center gap-1 rounded-md bg-white/10 p-1">
+        <nav aria-label="Demo view" className="flex items-center gap-1 rounded-[0.375rem] border border-ink/25 p-0.5">
           <Link href="/" className={tab(!practiceSide)} aria-current={!practiceSide ? "page" : undefined}>
             Client side
           </Link>
@@ -51,10 +51,9 @@ export function DemoBar({ clock }: { clock: string | null }) {
         )}
       </div>
       {clock && (
-      <div className="border-t border-white/15">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2 sm:px-6">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-amber/25 px-4 py-2 sm:px-6">
           <p className="leading-snug">
-            <span className="text-white/75">Demo clock:</span> <strong className="font-semibold tabular-nums">{clock}</strong>
+            Demo clock: <strong className="font-semibold tabular-nums">{clock}</strong>
           </p>
           <div className="flex flex-wrap items-center gap-2">
             <button type="button" className={step} disabled={pending} onClick={() => skip("20min")}>
@@ -65,25 +64,26 @@ export function DemoBar({ clock }: { clock: string | null }) {
             </button>
           </div>
           {error ? (
-            <p key="error" role="alert" className="min-w-0 flex-1 basis-64 leading-snug">
+            <p key="error" role="alert" className="min-w-0 flex-1 basis-64 font-semibold leading-snug text-flag">
               {error}
             </p>
           ) : (
-            <p key="hint" className="min-w-0 flex-1 basis-64 leading-snug text-white/75">
+            <p key="hint" className="min-w-0 flex-1 basis-64 leading-snug text-amber">
               Time only moves when you skip it, so you can watch reminders go out and offers lapse.
             </p>
           )}
         </div>
-      </div>
       )}
     </div>
   );
 }
 
+const BUTTON = "min-h-11 cursor-pointer rounded-[0.25rem] border border-ink/40 px-3 font-semibold hover:border-ink hover:bg-ink/5 lg:min-h-9";
+
 function ResetButton() {
   const { pending } = useFormStatus();
   return (
-    <button type="submit" disabled={pending} className="cursor-pointer rounded border border-white/30 px-3 py-1.5 font-semibold hover:border-white disabled:opacity-60">
+    <button type="submit" disabled={pending} className={`${BUTTON} disabled:opacity-60`}>
       {pending ? "Resetting" : "Reset demo"}
     </button>
   );

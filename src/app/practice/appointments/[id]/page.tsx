@@ -28,19 +28,21 @@ export default async function AppointmentDetailPage({ params }: PageProps<"/prac
   ]);
 
   return (
-    <div className="max-w-3xl">
-      <Link href={`/practice?t=${therapist.id}&w=${dayKey(mondayOf(dayOf(appointment.startsAt)))}`} className="font-semibold text-accent underline">
+    <div className="max-w-[68rem]">
+      <Link href={`/practice?t=${therapist.id}&w=${dayKey(mondayOf(dayOf(appointment.startsAt)))}`} className="inline-flex min-h-11 items-center font-semibold text-accent underline">
         Back to the calendar
       </Link>
-      <div className="mt-3 flex flex-wrap items-center gap-3">
-        <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight">{client.name}</h1>
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2">
+        <h1 className="font-display text-[2.25rem] font-medium leading-[1.1] tracking-[-0.01em] lg:text-[2.625rem]">{client.name}</h1>
         <AppointmentChip status={appointment.status} />
       </div>
-      <p className="mt-1 text-lg">
+      <p className="mt-2 text-lg">
         {fmtDateTimeLong(appointment.startsAt)} with {therapist.name}, {MODE_LABEL[appointment.mode].toLowerCase()}
       </p>
 
-      <dl className="panel mt-6 grid gap-x-8 gap-y-4 px-5 py-5 sm:grid-cols-2">
+      <div className="mt-8 grid gap-x-12 gap-y-10 xl:grid-cols-2">
+      <div>
+      <dl className="grid gap-x-8 gap-y-4 border-t-2 border-ink pt-4 sm:grid-cols-2">
         <div>
           <dt className="text-sm text-muted">Contact</dt>
           <dd className="mt-0.5">{client.phone}</dd>
@@ -55,7 +57,7 @@ export default async function AppointmentDetailPage({ params }: PageProps<"/prac
       </dl>
 
       <section className="mt-8">
-        <h2 className="font-display text-xl font-semibold tracking-tight">Reminders</h2>
+        <h2 className="font-display text-2xl font-medium">Reminders</h2>
         <ul className="panel mt-3 divide-y divide-line">
           {reminders.map((reminder) => (
             <li key={reminder.id} className="flex flex-wrap items-baseline justify-between gap-x-4 px-5 py-3">
@@ -81,9 +83,11 @@ export default async function AppointmentDetailPage({ params }: PageProps<"/prac
         </p>
       )}
 
+      </div>
+
       {preview && (
-        <section className="mt-8">
-          <h2 className="font-display text-xl font-semibold tracking-tight">If this is cancelled</h2>
+        <section className="border-t-2 border-ink pt-4">
+          <h2 className="font-display text-2xl font-medium">If this is cancelled</h2>
           {preview.tooLate ? (
             <p className="mt-2 max-w-[65ch] leading-relaxed text-muted">
               It is less than {OFFER_CUTOFF_HOURS} hours away, too late to offer to the waitlist. The time would simply open for the front desk to fill.
@@ -99,7 +103,7 @@ export default async function AppointmentDetailPage({ params }: PageProps<"/prac
               <ol className="panel mt-3 divide-y divide-line">
                 {preview.eligible.map((verdict, index) => (
                   <li key={verdict.candidate.entryId} className="flex items-baseline gap-4 px-5 py-3">
-                    <span className="w-5 font-display font-semibold tabular-nums text-accent">{index + 1}</span>
+                    <span className="w-5 font-display text-lg italic text-muted">{index + 1}</span>
                     <span className="flex-1 font-semibold">{verdict.candidate.clientName}</span>
                     <span className="text-muted">{verdict.reason}</span>
                   </li>
@@ -108,11 +112,20 @@ export default async function AppointmentDetailPage({ params }: PageProps<"/prac
             </>
           )}
           {!preview.tooLate && preview.skipped.length > 0 && (
-            <details className="mt-3">
-              <summary className="cursor-pointer font-semibold text-accent">
-                {preview.skipped.length} on the waitlist would be skipped, and why
+            <details className="group mt-3 border-y border-line">
+              <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 font-semibold text-accent [&::-webkit-details-marker]:hidden">
+                <span>
+                  {preview.skipped.length} on the waitlist would be skipped, and why
+                </span>
+                <span className="flex shrink-0 items-center gap-2 text-sm font-medium text-muted">
+                  <span className="group-open:hidden">Show</span>
+                  <span className="hidden group-open:inline">Hide</span>
+                  <svg viewBox="0 0 16 16" aria-hidden="true" className="h-4 w-4 text-accent transition-transform group-open:rotate-180 motion-reduce:transition-none" fill="none">
+                    <path d="M3 6l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
               </summary>
-              <ul className="mt-2 grid gap-1 text-[0.9375rem]">
+              <ul className="grid gap-1 pb-3 text-[0.9375rem]">
                 {preview.skipped.map((verdict) => (
                   <li key={verdict.candidate.entryId}>
                     <span className="font-semibold">{verdict.candidate.clientName}:</span> <span className="text-muted">{verdict.reason}</span>
@@ -126,6 +139,7 @@ export default async function AppointmentDetailPage({ params }: PageProps<"/prac
           </ActionButton>
         </section>
       )}
+      </div>
     </div>
   );
 }
