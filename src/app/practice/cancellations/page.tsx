@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { OpeningChip, PageHeader } from "@/components/ui";
-import { fmtDateTimeLong, fmtTime, fmtDay, minutesBetween } from "@/lib/time";
+import { OFFER_WINDOW_MINUTES } from "@/lib/practice";
+import { countOf, fmtDateTimeLong, fmtTime, fmtDay, minutesBetween } from "@/lib/time";
 import { openingsView } from "@/server/queries";
 import { getCtx } from "@/server/session";
 
@@ -51,12 +52,12 @@ export default async function CancellationsPage() {
               <div className="mt-4 rounded-lg bg-amber-tint px-4 py-3">
                 <p className="leading-relaxed text-amber">
                   <strong className="font-semibold">{live.clientName}</strong> has until {fmtTime(live.offer.expiresAt)} to answer (
-                  {Math.max(0, minutesBetween(ctx.now, live.offer.expiresAt))} minutes left).
+                  {countOf(Math.max(0, minutesBetween(ctx.now, live.offer.expiresAt)), "minute")} left).
                 </p>
                 <div className="mt-3 rounded-lg border border-dashed border-ink/40 bg-surface px-3 py-3">
                   <p className="text-sm font-semibold">In this demo</p>
                   <p className="mt-1 text-[0.9375rem] leading-relaxed text-ink-soft">
-                    Answer as {live.clientName.split(" ")[0]}, or use <strong className="font-semibold">Skip 20 minutes</strong> in the top bar to let the
+                    Answer as {live.clientName.split(" ")[0]}, or use <strong className="font-semibold">Skip {OFFER_WINDOW_MINUTES} minutes</strong> in the top bar to let the
                     offer lapse and pass to the next person.
                   </p>
                   <Link href={`/offer/${live.offer.token}`} className="btn btn-primary mt-3 w-full sm:w-auto">

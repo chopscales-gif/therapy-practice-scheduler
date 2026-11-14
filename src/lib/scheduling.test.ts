@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { isSessionStart, openSlots, sessionsOn, slotKey } from "./slots";
 import { zonedTime } from "./time";
-import { describeDays, describeParts, rankCandidates, type Candidate, type Circumstances, type OpenedSlot } from "./waitlist";
+import { describeDays, describeParts, modeForOffer, rankCandidates, waitingLabel, type Candidate, type Circumstances, type OpenedSlot } from "./waitlist";
 
 const HOURS = { 1: [9, 10, 14], 2: [15, 16] };
 const MONDAY = { y: 2026, m: 11, d: 16 };
@@ -62,6 +62,20 @@ const candidate = (over: Partial<Candidate> & { entryId: string }): Candidate =>
 });
 const facts = (over: Partial<Circumstances> = {}): Circumstances => ({ now: NOW, busyClientIds: new Set(), alreadyOffered: new Set(), holdingAnotherOffer: new Set(), cancelledByClientId: null, ...over });
 const names = (verdicts: { candidate: Candidate }[]) => verdicts.map((verdict) => verdict.candidate.entryId);
+
+describe("waitlist wording", () => {
+  it("books a taken offer by video only for someone who asked for video", () => {
+    expect(modeForOffer("video", true)).toBe("video");
+    expect(modeForOffer("either", true)).toBe("office");
+    expect(modeForOffer("office", true)).toBe("office");
+    expect(modeForOffer("either", false)).toBe("office");
+  });
+
+  it("does not say someone who joined today has waited 0 days", () => {
+    expect(waitingLabel(zonedTime(MONDAY, 9), zonedTime(MONDAY, 15))).toBe("Joined today");
+    expect(waitingLabel(zonedTime(MONDAY, 9), zonedTime(TUESDAY, 9))).toBe("Waiting 1 day");
+  });
+});
 
 describe("waitlist ranking", () => {
   it("offers to whoever has waited longest", () => {

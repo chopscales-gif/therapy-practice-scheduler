@@ -21,7 +21,7 @@ type Recipient = { name: string; contactBy: ContactBy };
 
 const firstName = (name: string) => name.trim().split(/\s+/)[0];
 const url = (path: string) => `https://${PRACTICE.site}${path}`;
-const where = (mode: Mode) => (mode === "video" ? "by video. Your link is on the page below" : "at our office");
+const where = (mode: Mode) => (mode === "video" ? "by video. You join from the page below" : "at our office");
 
 function draft(to: Recipient, kind: Draft["kind"], link: string | null, sms: string, email: { subject: string; body: string }): Draft {
   return to.contactBy === "text" ? { channel: "sms", kind, subject: null, body: sms, link } : { channel: "email", kind, link, ...email };
@@ -34,7 +34,7 @@ export function bookedMessage(to: Recipient, startsAt: Date, mode: Mode, token: 
     kind: "booked",
     link,
     subject: `Your appointment on ${fmtDateTime(startsAt)}`,
-    body: `Hello ${firstName(to.name)},\n\nYour appointment is booked for ${fmtDateTimeLong(startsAt)}, ${where(mode)}.\n\nTo confirm, change or cancel it: ${url(link)}\n\nWe will send a reminder before your appointment.\n\n${PRACTICE.shortName}\n${PRACTICE.phone}`,
+    body: `Hello ${firstName(to.name)},\n\nYour appointment is booked for ${fmtDateTimeLong(startsAt)}, ${where(mode)}.\n\nTo confirm or cancel it: ${url(link)}\n\nWe will send a reminder before your appointment.\n\n${PRACTICE.shortName}\n${PRACTICE.phone}`,
   };
 }
 

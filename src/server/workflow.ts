@@ -35,7 +35,7 @@ import {
 import { earliestBookable, horizonEnd, isSessionStart } from "@/lib/slots";
 import { story } from "@/lib/story";
 import { addDays, compareDays, dayOf, zonedTime } from "@/lib/time";
-import { rankCandidates, type Candidate, type Verdict } from "@/lib/waitlist";
+import { modeForOffer, rankCandidates, type Candidate, type Verdict } from "@/lib/waitlist";
 
 /**
  * Every change to the schedule goes through this file: booking, confirming,
@@ -328,7 +328,7 @@ async function offerToNext(ctx: Ctx, openingId: string): Promise<void> {
   };
 
   const cutoff = offerCutoff(opening.startsAt);
-  if (ctx.now >= cutoff) return close(story.tooLate());
+  if (ctx.now >= cutoff) return close(story.tooLate(made.length));
 
   const therapist = (await findTherapist(ctx, opening.therapistId))!;
   const [cancelled] = await ctx.db.select({ clientId: appointments.clientId }).from(appointments).where(eq(appointments.id, opening.cancelledAppointmentId));
@@ -394,7 +394,7 @@ export function respondToOffer(ctx: Ctx, offerToken: string, answer: "accept" | 
       therapistId: opening.therapistId,
       clientId: client.id,
       startsAt: opening.startsAt,
-      mode: entry.mode === "video" && therapist.offersVideo ? "video" : "office",
+      mode: modeForOffer(entry.mode, therapist.offersVideo),
       source: "waitlist",
     });
     if (!appointment) throw new WorkflowError("This time has just been taken.");

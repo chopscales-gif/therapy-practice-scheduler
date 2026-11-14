@@ -13,6 +13,7 @@ import {
   type Appointment,
   type Client,
   type Offer,
+  type WaitlistEntry,
   type Opening,
   type OpeningEvent,
   type Therapist,
@@ -135,12 +136,13 @@ export async function openingForCancelled(ctx: Ctx, appointmentId: string): Prom
   return row ?? null;
 }
 
-export type OfferView = { offer: Offer; opening: Opening; therapist: Therapist; client: Client };
+export type OfferView = { offer: Offer; opening: Opening; therapist: Therapist; client: Client; entry: WaitlistEntry };
 
 export async function offerByToken(ctx: Ctx, token: string): Promise<OfferView | null> {
   const [row] = await ctx.db
-    .select({ offer: offers, opening: openings, therapist: therapists, client: clients })
+    .select({ offer: offers, opening: openings, therapist: therapists, client: clients, entry: waitlistEntries })
     .from(offers)
+    .innerJoin(waitlistEntries, eq(waitlistEntries.id, offers.entryId))
     .innerJoin(openings, eq(openings.id, offers.openingId))
     .innerJoin(therapists, eq(therapists.id, openings.therapistId))
     .innerJoin(clients, eq(clients.id, offers.clientId))

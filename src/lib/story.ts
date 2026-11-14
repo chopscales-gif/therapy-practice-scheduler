@@ -20,5 +20,6 @@ export const story = {
     offersMade === 0
       ? "No one on the waitlist fits this time. It is open for online booking."
       : "No one else on the waitlist fits this time. It is open for online booking.",
-  tooLate: () => `Less than ${OFFER_CUTOFF_HOURS} hours to go, so no more offers go out. The front desk can still fill it by phone.`,
+  tooLate: (offersMade: number) =>
+    `Less than ${OFFER_CUTOFF_HOURS} hours to go, ${offersMade === 0 ? "too late to offer it to the waitlist" : "so no more offers go out"}. The front desk can still fill it by phone.`,
 };

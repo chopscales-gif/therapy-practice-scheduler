@@ -88,6 +88,22 @@ describe("sandbox", () => {
     }
   });
 
+  it("gives each client one therapist, and a phone number that is nobody else's", async () => {
+    const { ctx } = await fresh();
+    const rows = await ctx.db.select().from(appointments).where(eq(appointments.sandboxId, ctx.sandboxId));
+    const therapistOf = new Map<string, string>();
+    for (const row of rows) {
+      expect(therapistOf.get(row.clientId) ?? row.therapistId).toBe(row.therapistId);
+      therapistOf.set(row.clientId, row.therapistId);
+    }
+    const phones = (await ctx.db.select().from(clients).where(eq(clients.sandboxId, ctx.sandboxId))).map((client) => client.phone);
+    expect(new Set(phones).size).toBe(phones.length);
+    // Not the practice's own number, and not the one the booking form is filled in with.
+    expect(phones).not.toContain("(801) 555-0142");
+    expect(phones).not.toContain("(801) 555-0117");
+    for (const phone of phones) expect(phone).toMatch(/^\(801\) 555-01\d\d$/);
+  });
+
   it("keeps visitors apart and resets cleanly", async () => {
     const a = await fresh();
     const b = await fresh();
@@ -261,7 +277,7 @@ describe("a cancellation fills itself from the waitlist", () => {
     const late: Ctx = { ...ctx, now: zonedTime(tuesday, 13, 30) };
     const closed = await cancel(late, (await appointmentAt(ctx, naomi.id, TUESDAY_3PM)).id, "client");
     expect(closed.status).toBe("unfilled");
-    expect((await timeline(ctx, closed.id)).at(-1)).toMatch(/Less than 2 hours to go/);
+    expect((await timeline(ctx, closed.id)).at(-1)).toBe("Less than 2 hours to go, too late to offer it to the waitlist. The front desk can still fill it by phone.");
 
     const other = await fresh();
     const tight: Ctx = { ...other.ctx, now: zonedTime(tuesday, 12, 50) };

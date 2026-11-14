@@ -1,12 +1,12 @@
 "use client";
 
-import type { ContactBy } from "@/lib/practice";
+import { SAMPLE_VISITOR_PHONE, type ContactBy } from "@/lib/practice";
 import { FakeDetailsNote } from "./ui";
 
 export type Person = { name: string; email: string; phone: string; contactBy: ContactBy };
 
 /** The sample visitor, filled in so nobody has to type their own details into a demo. */
-export const SAMPLE_PERSON: Person = { name: "Jordan Ellery", email: "jordan.ellery@mail.example", phone: "(801) 555-0117", contactBy: "text" };
+export const SAMPLE_PERSON: Person = { name: "Jordan Ellery", email: "jordan.ellery@mail.example", phone: SAMPLE_VISITOR_PHONE, contactBy: "text" };
 
 export function PersonFields({ value, onChange }: { value: Person; onChange: (next: Person) => void }) {
   const set = <K extends keyof Person>(key: K, next: Person[K]) => onChange({ ...value, [key]: next });

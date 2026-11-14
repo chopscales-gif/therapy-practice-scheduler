@@ -8,6 +8,9 @@ export const PRACTICE = {
   site: "larkspur.example",
 };
 
+/** The number the booking form is filled in with, so nobody types their own into a demo. */
+export const SAMPLE_VISITOR_PHONE = "(801) 555-0117";
+
 export const SESSION_MINUTES = 50;
 /** Online booking closes this long before a session starts. */
 export const BOOKING_LEAD_HOURS = 2;

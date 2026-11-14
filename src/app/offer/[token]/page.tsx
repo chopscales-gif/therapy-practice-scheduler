@@ -3,8 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActionButton } from "@/components/action-button";
 import { DemoHint, SiteFrame } from "@/components/site";
-import { MODE_LABEL } from "@/lib/practice";
-import { fmtDateTimeLong, fmtTime, minutesBetween } from "@/lib/time";
+import { MODE_LABEL, OFFER_WINDOW_MINUTES, SESSION_MINUTES } from "@/lib/practice";
+import { countOf, fmtDateTimeLong, fmtTime, minutesBetween } from "@/lib/time";
+import { modeForOffer } from "@/lib/waitlist";
 import { respondToOfferAction } from "@/server/actions";
 import { offerByToken } from "@/server/queries";
 import { getCtx } from "@/server/session";
@@ -23,7 +24,9 @@ export default async function OfferPage({ params }: PageProps<"/offer/[token]">)
   const ctx = await getCtx();
   const view = await offerByToken(ctx, token);
   if (!view) notFound();
-  const { offer, opening, therapist, client } = view;
+  const { offer, opening, therapist, client, entry } = view;
+  // Someone who asked for either is booked in person unless they asked for video.
+  const mode = MODE_LABEL[modeForOffer(entry.mode, therapist.offersVideo)];
   const minutesLeft = Math.max(0, minutesBetween(ctx.now, offer.expiresAt));
 
   return (
@@ -35,21 +38,21 @@ export default async function OfferPage({ params }: PageProps<"/offer/[token]">)
         <div>
           <dt className="text-sm text-muted">When</dt>
           <dd className="mt-0.5 text-lg font-semibold">{fmtDateTimeLong(opening.startsAt)}</dd>
-          <dd className="text-sm text-muted">50 minutes, Mountain Time</dd>
+          <dd className="text-sm text-muted">{SESSION_MINUTES} minutes, Mountain Time</dd>
         </div>
         <div>
           <dt className="text-sm text-muted">With</dt>
           <dd className="mt-0.5 text-lg font-semibold">
             {therapist.name}, {therapist.credentials}
           </dd>
-          <dd className="text-sm text-muted">{therapist.offersVideo ? "In person or video" : MODE_LABEL.office}</dd>
+          <dd className="text-sm text-muted">{mode}</dd>
         </div>
       </dl>
 
       {offer.status === "sent" && (
         <>
           <p className="mt-5 rounded-lg bg-amber-tint px-4 py-3 leading-relaxed text-amber">
-            Held for you until <strong className="font-semibold">{fmtTime(offer.expiresAt)}</strong> ({minutesLeft} minutes from now). After that it goes
+            Held for you until <strong className="font-semibold">{fmtTime(offer.expiresAt)}</strong> ({countOf(minutesLeft, "minute")} from now). After that it goes
             to the next person waiting.
           </p>
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-start">
@@ -62,7 +65,7 @@ export default async function OfferPage({ params }: PageProps<"/offer/[token]">)
           </div>
         </>
       )}
-      {offer.status === "accepted" && <p className="mt-5 leading-relaxed">You are booked. A confirmation with a link to change or cancel is on its way.</p>}
+      {offer.status === "accepted" && <p className="mt-5 leading-relaxed">You are booked. A confirmation with a link to cancel, should you need to, is on its way.</p>}
       {(offer.status === "declined" || offer.status === "expired") && (
         <p className="mt-5 leading-relaxed">You are still on the waitlist, in the same place, and will be offered the next time that fits.</p>
       )}
@@ -71,7 +74,7 @@ export default async function OfferPage({ params }: PageProps<"/offer/[token]">)
         {offer.status === "sent" ? (
           <>
             You are playing {client.name}, who has just received this link by {client.contactBy === "text" ? "text message" : "email"}. Take the time, pass,
-            or use <strong className="font-semibold">Skip 20 minutes</strong> in the bar at the top to let the offer lapse.
+            or use <strong className="font-semibold">Skip {OFFER_WINDOW_MINUTES} minutes</strong> in the bar at the top to let the offer lapse.
           </>
         ) : (
           <>

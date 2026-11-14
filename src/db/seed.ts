@@ -1,6 +1,6 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import { cancelledMessage, offerAcceptedMessage, offerMessage, reminderMessage, type Draft } from "@/lib/messages";
-import { REMINDER_HOURS, SESSION_MINUTES, type ContactBy, type Mode, type ModePreference, type PartOfDay } from "@/lib/practice";
+import { PRACTICE, REMINDER_HOURS, SAMPLE_VISITOR_PHONE, SESSION_MINUTES, type ContactBy, type Mode, type ModePreference, type PartOfDay } from "@/lib/practice";
 import { story } from "@/lib/story";
 import { addDays, dayOf, mondayOf, weekdayOf, zonedTime } from "@/lib/time";
 import type { Db } from "./client";
@@ -39,12 +39,19 @@ const THERAPISTS: { name: string; credentials: string; focus: string; offersVide
   { name: "Soo-Jin Park", credentials: "PsyD", focus: "Teens and young adults", offersVideo: true, hours: { 1: [8, 9, 10, 11, 13], 2: [16, 17, 18], 3: [8, 9, 10, 11, 13], 4: [16, 17, 18], 5: [8, 9, 10, 11, 13] } },
 ];
 
-/** Regular clients, who fill most of the calendar. */
+/**
+ * Regular clients, who fill most of the calendar. Each has one weekly time with
+ * one therapist, so nobody turns up on two therapists' calendars.
+ */
 const REGULARS = [
-  "Alma Reyes", "Bennett Okafor", "Celeste Brannigan", "Dmitri Vance", "Eleni Pappas", "Farid Nazari", "Gwen Holloway-Tran", "Hugo Sandoval",
-  "Ingrid Solberg", "Jamal Whitfield", "Keiko Tanaka", "Leona Fitzgerald", "Mateo Quiroga", "Nadia Rahman", "Oskar Lindahl", "Paloma Ibarra",
+  "Alma Reyes", "Bennett Okafor", "Celeste Brannigan", "Dmitri Vance", "Eleni Pappas", "Farid Nazari", "Gwen Abernathy", "Hugo Sandoval",
+  "Ingrid Solberg", "Jamal Whitfield", "Keiko Tanaka", "Leona Fitzgerald", "Mateo Quiroga", "Nadia Rahman", "Oskar Bergstrom", "Paloma Ibarra",
   "Quentin Ashby", "Renata Kowalczyk", "Silas Thornbury", "Tamsin Everly", "Ulrich Brandt", "Vivian Achebe", "Wendell Pruitt", "Ximena Calloway",
-  "Yusuf Demir", "Zelda Marchetti",
+  "Yusuf Demir", "Zelda Marchetti", "Abel Navarro", "Brigid Lowell", "Caspian Rhodes", "Delphine Arceneaux", "Emeka Obi", "Fiona Castellanos",
+  "Gideon Mercer", "Hana Kobayashi", "Idris Bello", "Josephine Tran", "Kofi Mensah", "Linnea Halvorsen", "Marcus Delacroix", "Noor Farouk",
+  "Odette Laurent", "Pavel Novak", "Rania Aziz", "Soren Vik", "Thea Lombardi", "Umar Siddiqui", "Valentina Cruz", "Wyatt Greer",
+  "Xavier Fontaine", "Yara Nasser", "Zane Whitlock", "Anneliese Roth", "Beckett Shaw", "Camila Vargas", "Dashiell Finch", "Esme Hawthorne",
+  "Felix Oyelaran", "Greer Sutherland", "Hollis Benton", "Imogen Vale",
 ];
 
 const WAITLIST: { name: string; daysAgo: number; therapist: number | null; days: number[]; parts: PartOfDay[]; mode: ModePreference }[] = [
@@ -59,8 +66,13 @@ const WAITLIST: { name: string; daysAgo: number; therapist: number | null; days:
 ];
 
 const emailFor = (name: string) => `${name.toLowerCase().replace(/[^a-z]+/g, ".")}@mail.example`;
-/** 555-01xx numbers are reserved for fiction. */
-const phoneFor = (index: number) => `(801) 555-01${String(index % 100).padStart(2, "0")}`;
+/**
+ * 555-01xx numbers are reserved for fiction. Two are left out so that no client
+ * shares a number with the practice itself or with the sample visitor.
+ */
+const TAKEN_NUMBERS = [PRACTICE.phone, SAMPLE_VISITOR_PHONE];
+const PHONES = Array.from({ length: 90 }, (_, i) => `(801) 555-01${i + 10}`).filter((phone) => !TAKEN_NUMBERS.includes(phone));
+const phoneFor = (index: number) => PHONES[index % PHONES.length];
 const token = () => randomBytes(18).toString("base64url");
 const minutes = (at: Date, count: number) => new Date(at.getTime() + count * 60_000);
 
@@ -73,10 +85,9 @@ export async function seedSandbox({ db, sandboxId, clock }: { db: Db; sandboxId:
   let people = 0;
   const person = (name: string, contactBy?: ContactBy) => {
     const index = people++;
-    return { id: randomUUID(), sandboxId, name, email: emailFor(name), phone: phoneFor(index + 10), contactBy: contactBy ?? (index % 4 === 0 ? "email" : "text") };
+    return { id: randomUUID(), sandboxId, name, email: emailFor(name), phone: phoneFor(index), contactBy: contactBy ?? (index % 4 === 0 ? "email" : "text") };
   };
   type Person = ReturnType<typeof person>;
-  const regulars = REGULARS.map((name) => person(name));
   const corinne = person("Corinne Abbott", "text");
   const rosa = person("Rosa Delgado", "text");
   const tobias = person("Tobias Lindqvist", "text");
@@ -134,9 +145,8 @@ export async function seedSandbox({ db, sandboxId, clock }: { db: Db; sandboxId:
 
   // Regular weekly clients. A fixed pattern, so every visitor sees the same calendar.
   const fixtures = new Set([tuesdayAtThree.getTime(), wednesdayAtTwo.getTime()]);
+  const regulars: Person[] = [];
   const regularFor = new Map<string, Person>();
-  const taken = new Set<string>();
-  let next = 0;
   for (let week = 0; week < 3; week++) {
     therapistRows.forEach((therapist, t) => {
       for (const [weekday, hours] of Object.entries(therapist.hours)) {
@@ -147,13 +157,12 @@ export async function seedSandbox({ db, sandboxId, clock }: { db: Db; sandboxId:
           if (mix >= [7, 5, 2][week]) continue;
           const slot = `${t}|${weekday}|${hour}`;
           let client = regularFor.get(slot);
-          for (let tries = 0; !client && tries < regulars.length; tries++) {
-            const candidate = regulars[next++ % regulars.length];
-            if (!taken.has(`${candidate.id}|${weekday}|${hour}`)) client = candidate;
+          if (!client) {
+            if (regulars.length === REGULARS.length) continue;
+            client = person(REGULARS[regulars.length]);
+            regulars.push(client);
+            regularFor.set(slot, client);
           }
-          if (!client) continue;
-          regularFor.set(slot, client);
-          taken.add(`${client.id}|${weekday}|${hour}`);
           const soon = startsAt.getTime() - clock.getTime() < 48 * 3_600_000;
           add(therapist.id, client, startsAt, { mode: therapist.offersVideo && mix % 3 === 0 ? "video" : "office", confirmed: soon && mix !== 4 });
         }

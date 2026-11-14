@@ -97,6 +97,9 @@ export function minutesBetween(from: Date, to: Date): number {
   return Math.round((to.getTime() - from.getTime()) / 60_000);
 }
 
+/** "1 minute", "20 minutes" */
+export const countOf = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
+
 export function daysBetween(from: Date, to: Date): number {
   return Math.floor((to.getTime() - from.getTime()) / 86_400_000);
 }

@@ -61,7 +61,7 @@ export function WaitlistForm({ therapists }: { therapists: TherapistOption[] }) 
   }
 
   return (
-    <form onSubmit={submit} className="grid gap-8">
+    <form onSubmit={submit} className="grid grid-cols-[minmax(0,1fr)] gap-8">
       <label className="grid gap-1.5">
         <span className="font-semibold">Therapist</span>
         <select className="field" value={therapistId} onChange={(event) => setTherapistId(event.target.value)}>

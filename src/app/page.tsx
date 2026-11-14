@@ -23,7 +23,7 @@ export default async function BookingPage() {
     <SiteFrame>
       <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl">Book an appointment</h1>
       <p className="mt-3 max-w-[60ch] text-lg leading-relaxed text-muted">
-        Choose a therapist and a time that suits you. You will get a confirmation with a link to change or cancel, and a reminder before the day.
+        Choose a therapist and a time that suits you. You will get a confirmation with a link to confirm or cancel, and reminders before the day.
       </p>
       <div className="mt-10">
         <BookingFlow therapists={therapists.map(({ id, name, credentials, focus, offersVideo }) => ({ id, name, credentials, focus, offersVideo }))} slots={options} />

@@ -41,6 +41,13 @@ export default async function AppointmentPage({ params }: PageProps<"/a/[token]"
         </div>
       </dl>
 
+      {active && upcoming && appointment.mode === "video" && (
+        <p className="mt-5 leading-relaxed text-ink-soft">
+          You join from this page: a button to start the video session appears here shortly before your time. No video service is connected in this
+          demo.
+        </p>
+      )}
+
       {active && upcoming && (
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-start">
           {appointment.status === "booked" && (

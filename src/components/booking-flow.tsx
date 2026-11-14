@@ -62,7 +62,7 @@ export function BookingFlow({ therapists, slots }: Props) {
   }
 
   return (
-    <form onSubmit={submit} className="grid gap-10">
+    <form onSubmit={submit} className="grid grid-cols-[minmax(0,1fr)] gap-10">
       <section aria-labelledby="who">
         <h2 id="who" className="font-display text-xl font-semibold tracking-tight">
           1. Who would you like to see?

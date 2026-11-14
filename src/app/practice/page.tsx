@@ -18,21 +18,22 @@ export default async function CalendarPage({ searchParams }: PageProps<"/practic
   const therapists = await listTherapists(ctx);
   const therapist = therapists.find((item) => item.id === query.t) ?? therapists[0];
 
-  // The calendar covers last week to four weeks out: the range the sample data fills.
+  // The calendar covers the week the demo opened on to three weeks ahead: the range the sample data fills.
+  const demo = await scenario(ctx);
   const thisWeek = mondayOf(dayOf(ctx.now));
   const asked = parseDayKey(typeof query.w === "string" ? query.w : undefined);
-  const earliest = addDays(thisWeek, -7);
+  const earliest = demo ? mondayOf(dayOf(demo.startsAt)) : thisWeek;
   const latest = addDays(thisWeek, 21);
   let monday = asked ? mondayOf(asked) : thisWeek;
   if (compareDays(monday, earliest) < 0) monday = earliest;
   if (compareDays(monday, latest) > 0) monday = latest;
 
-  const [week, demo] = await Promise.all([weekView(ctx, therapist, monday), scenario(ctx)]);
+  const week = await weekView(ctx, therapist, monday);
   const today = dayOf(ctx.now);
   const href = (t: Therapist, w: Day) => `/practice?t=${t.id}&w=${dayKey(w)}`;
   const previous = compareDays(monday, earliest) > 0 ? addDays(monday, -7) : null;
   const next = compareDays(monday, latest) < 0 ? addDays(monday, 7) : null;
-  const pager = "btn btn-quiet min-h-10 px-4 py-1.5 text-[0.9375rem]";
+  const pager = "btn btn-quiet min-h-11 px-4 py-1.5 text-[0.9375rem]";
 
   return (
     <>
@@ -67,7 +68,7 @@ export default async function CalendarPage({ searchParams }: PageProps<"/practic
       </div>
 
       <p className="mb-3 text-muted">
-        {therapist.name}, {therapist.credentials}: {week.booked} booked, {week.open} still open this week.
+        {therapist.name}, {therapist.credentials}: {week.booked} booked, {week.open} still open {compareDays(monday, thisWeek) === 0 ? "this week" : "that week"}.
       </p>
 
       <WeekGrid week={week} today={today} />

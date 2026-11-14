@@ -25,7 +25,7 @@ export function SiteFrame({ children, wide = false }: { children: React.ReactNod
       <footer className="border-t border-line">
         <p className="mx-auto max-w-5xl px-4 py-5 text-sm leading-relaxed text-muted sm:px-6">
           {PRACTICE.name}, {PRACTICE.city}, is a fictional practice in a demonstration build by ChopMedia. In an emergency, call 911. For the Suicide
-          and Crisis Lifeline, call or text 988.
+          and Crisis Lifeline, call or text 988. This demo is designed with HIPAA in mind. It is not HIPAA compliant or certified.
         </p>
       </footer>
     </>

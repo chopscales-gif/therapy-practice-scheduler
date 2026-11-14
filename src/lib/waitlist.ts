@@ -1,5 +1,5 @@
-import { partOfDay, PARTS_OF_DAY, type ModePreference, type PartOfDay } from "./practice";
-import { daysBetween, localParts, weekdayOf, WEEKDAYS } from "./time";
+import { partOfDay, PARTS_OF_DAY, type Mode, type ModePreference, type PartOfDay } from "./practice";
+import { countOf, daysBetween, localParts, weekdayOf, WEEKDAYS } from "./time";
 
 /**
  * Who gets offered a slot that has opened. Written rules, no scoring model:
@@ -44,7 +44,11 @@ export function waitingDays(joinedAt: Date, now: Date): number {
   return Math.max(0, daysBetween(joinedAt, now));
 }
 
-const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
+/** "Waiting 22 days", or "Joined today" for someone who has not yet waited a day. */
+export function waitingLabel(joinedAt: Date, now: Date): string {
+  const days = waitingDays(joinedAt, now);
+  return days === 0 ? "Joined today" : `Waiting ${countOf(days, "day")}`;
+}
 
 function whyNot(candidate: Candidate, slot: OpenedSlot, facts: Circumstances): string | null {
   const local = localParts(slot.startsAt);
@@ -69,9 +73,17 @@ export function rankCandidates(slot: OpenedSlot, waiting: Candidate[], facts: Ci
   for (const candidate of inOrder) {
     const reason = whyNot(candidate, slot, facts);
     if (reason) skipped.push({ candidate, eligible: false, reason });
-    else eligible.push({ candidate, eligible: true, reason: `Waiting ${plural(waitingDays(candidate.joinedAt, facts.now), "day")}` });
+    else eligible.push({ candidate, eligible: true, reason: waitingLabel(candidate.joinedAt, facts.now) });
   }
   return { eligible, skipped };
+}
+
+/**
+ * How a time taken from the waitlist is booked: by video only for someone who
+ * asked for video, with a therapist who offers it. Otherwise in person.
+ */
+export function modeForOffer(preference: ModePreference, therapistOffersVideo: boolean): Mode {
+  return preference === "video" && therapistOffersVideo ? "video" : "office";
 }
 
 const SHORT_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

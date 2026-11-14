@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActionButton } from "@/components/action-button";
 import { AppointmentChip } from "@/components/ui";
-import { MODE_LABEL, OFFER_WINDOW_MINUTES } from "@/lib/practice";
+import { MODE_LABEL, OFFER_CUTOFF_HOURS, OFFER_WINDOW_MINUTES } from "@/lib/practice";
 import { dayKey, dayOf, fmtDateTime, fmtDateTimeLong, mondayOf } from "@/lib/time";
 import { cancelAction } from "@/server/actions";
 import { appointmentById, openingForCancelled, remindersFor } from "@/server/queries";
@@ -86,7 +86,7 @@ export default async function AppointmentDetailPage({ params }: PageProps<"/prac
           <h2 className="font-display text-xl font-semibold tracking-tight">If this is cancelled</h2>
           {preview.tooLate ? (
             <p className="mt-2 max-w-[65ch] leading-relaxed text-muted">
-              It is less than 2 hours away, too late to offer to the waitlist. The time would simply open for the front desk to fill.
+              It is less than {OFFER_CUTOFF_HOURS} hours away, too late to offer to the waitlist. The time would simply open for the front desk to fill.
             </p>
           ) : preview.eligible.length === 0 ? (
             <p className="mt-2 max-w-[65ch] leading-relaxed text-muted">Nobody on the waitlist fits this time, so it would open for online booking straight away.</p>
@@ -107,7 +107,7 @@ export default async function AppointmentDetailPage({ params }: PageProps<"/prac
               </ol>
             </>
           )}
-          {preview.skipped.length > 0 && (
+          {!preview.tooLate && preview.skipped.length > 0 && (
             <details className="mt-3">
               <summary className="cursor-pointer font-semibold text-accent">
                 {preview.skipped.length} on the waitlist would be skipped, and why
