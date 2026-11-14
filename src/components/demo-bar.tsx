@@ -32,9 +32,10 @@ export function DemoBar({ clock }: { clock: string | null }) {
 
   return (
     <div className="demo-chrome border-b border-dashed border-amber bg-amber-tint text-sm text-ink">
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 px-4 py-2 sm:px-6">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 px-4 py-1.5 sm:gap-y-2 sm:px-6 sm:py-2">
         <p className="min-w-0 flex-1 basis-64 leading-snug">
-          <strong className="font-semibold">Demonstration build.</strong> A fictional practice with invented people. Nothing is sent.
+          <strong className="font-semibold">Demonstration build.</strong> <span className="sm:hidden">Fictional practice. Nothing is sent.</span>
+          <span className="hidden sm:inline">A fictional practice with invented people. Nothing is sent.</span>
         </p>
         <nav aria-label="Demo view" className="flex items-center gap-1 rounded-[0.375rem] border border-ink/25 p-0.5">
           <Link href="/" className={tab(!practiceSide)} aria-current={!practiceSide ? "page" : undefined}>
@@ -51,16 +52,23 @@ export function DemoBar({ clock }: { clock: string | null }) {
         )}
       </div>
       {clock && (
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-amber/25 px-4 py-2 sm:px-6">
-          <p className="leading-snug">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 border-t border-amber/25 px-4 py-1.5 sm:gap-x-4 sm:gap-y-2 sm:px-6 sm:py-2">
+          <p className="hidden leading-snug sm:block">
             Demo clock: <strong className="font-semibold tabular-nums">{clock}</strong>
+          </p>
+          {/* On a phone the clock is two short lines beside the skip buttons, so the bar stays small. */}
+          <p className="mr-auto leading-tight sm:hidden">
+            <span className="block text-[0.8125rem]">Demo clock</span>
+            <strong className="block font-semibold tabular-nums">{shortClock(clock)}</strong>
           </p>
           <div className="flex flex-wrap items-center gap-2">
             <button type="button" className={step} disabled={pending} onClick={() => skip("20min")}>
               Skip 20 minutes
             </button>
             <button type="button" className={step} disabled={pending} onClick={() => skip("tomorrow")}>
-              Skip to tomorrow, 8 AM
+              <span className="sr-only sm:not-sr-only">Skip to </span>
+              <span className="sm:hidden">Tomorrow, 8 AM</span>
+              <span className="hidden sm:inline">tomorrow, 8 AM</span>
             </button>
           </div>
           {error ? (
@@ -68,7 +76,7 @@ export function DemoBar({ clock }: { clock: string | null }) {
               {error}
             </p>
           ) : (
-            <p key="hint" className="min-w-0 flex-1 basis-64 leading-snug text-amber">
+            <p key="hint" className="hidden min-w-0 flex-1 basis-64 leading-snug text-amber sm:block">
               Time only moves when you skip it, so you can watch reminders go out and offers lapse.
             </p>
           )}
@@ -78,7 +86,13 @@ export function DemoBar({ clock }: { clock: string | null }) {
   );
 }
 
-const BUTTON = "min-h-11 cursor-pointer rounded-[0.25rem] border border-ink/40 px-3 font-semibold hover:border-ink hover:bg-ink/5 lg:min-h-9";
+/** "Mon, Nov 16 at 9:00 AM" as "Mon, 9:00 AM". */
+function shortClock(clock: string) {
+  const [date, time] = clock.split(" at ");
+  return time ? `${date.split(",")[0]}, ${time}` : clock;
+}
+
+const BUTTON = "min-h-11 cursor-pointer rounded-[0.25rem] border border-ink/40 px-2.5 sm:px-3 font-semibold hover:border-ink hover:bg-ink/5 lg:min-h-9";
 
 function ResetButton() {
   const { pending } = useFormStatus();

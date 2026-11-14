@@ -25,13 +25,13 @@ const NAV = [
  * The fictional practice's public website frame, around every client-side page.
  * On a laptop the practice's own panel stays put on the left, with what the page
  * is about, while the work of the page happens on the right. On a phone the
- * panel is the top of the page.
+ * panel is a short top of the page, so the first choice is on the first screen.
  */
 export function SiteFrame({ aside, children }: { aside: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="flex flex-1 flex-col lg:grid lg:grid-cols-[24rem_minmax(0,1fr)] xl:grid-cols-[29rem_minmax(0,1fr)]">
       <header className="on-dusk bg-dusk text-white">
-        <div className="flex flex-col px-5 pb-8 pt-5 sm:px-8 lg:sticky lg:top-0 lg:min-h-[min(100%,calc(100vh-5.5rem))] lg:px-10 lg:pb-10 lg:pt-9 xl:px-12">
+        <div className="flex flex-col px-5 pb-5 pt-3 sm:px-8 sm:pb-8 sm:pt-5 lg:sticky lg:top-0 lg:min-h-[min(100%,calc(100vh-5.5rem))] lg:px-10 lg:pb-10 lg:pt-9 xl:px-12">
           <Link href="/" className="flex min-h-11 items-center gap-3 self-start rounded-sm">
             <LarkspurMark className="h-10 w-6 text-[#b7c1ee]" />
             <span className="font-display text-[1.375rem] font-medium leading-[1.1]">
@@ -39,14 +39,14 @@ export function SiteFrame({ aside, children }: { aside: React.ReactNode; childre
               <span className="block text-[0.9375rem] font-normal italic text-dusk-soft">Counseling, {PRACTICE.city.split(",")[0]}</span>
             </span>
           </Link>
-          <nav aria-label="Larkspur website" className="mt-5 flex flex-wrap gap-x-6 border-t border-white/15 pt-1 lg:hidden">
+          <nav aria-label="Larkspur website" className="mt-1 flex flex-wrap gap-x-6 border-t border-white/15 sm:mt-5 sm:pt-1 lg:hidden">
             {NAV.map((item) => (
               <Link key={item.href} href={item.href} className="flex min-h-11 items-center font-semibold underline decoration-white/40 underline-offset-4">
                 {item.label}
               </Link>
             ))}
           </nav>
-          <div className="mt-6 lg:mt-14">{aside}</div>
+          <div className="mt-3 sm:mt-6 lg:mt-14">{aside}</div>
           <p className="mt-auto hidden pt-10 text-[0.9375rem] leading-relaxed text-dusk-soft lg:block">
             Questions, or rather talk to someone? Call the front desk on <span className="whitespace-nowrap font-semibold text-white">{PRACTICE.phone}</span>.
           </p>
@@ -62,7 +62,7 @@ export function SiteFrame({ aside, children }: { aside: React.ReactNode; childre
           ))}
           <span className="ml-auto tabular-nums text-muted">{PRACTICE.phone}</span>
         </nav>
-        <main className="w-full max-w-[60rem] flex-1 px-5 py-8 sm:px-8 lg:px-10 lg:py-10 xl:px-14">{children}</main>
+        <main className="w-full max-w-[60rem] flex-1 px-5 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10 xl:px-14">{children}</main>
         <footer className="border-t border-line px-5 py-5 sm:px-8 lg:px-10 xl:px-14">
           <p className="max-w-[60rem] text-sm leading-relaxed text-muted">
             {PRACTICE.name}, {PRACTICE.city}, is a fictional practice in a demonstration build by ChopMedia. In an emergency, call 911. For the Suicide
@@ -78,9 +78,9 @@ export function SiteFrame({ aside, children }: { aside: React.ReactNode; childre
 export function AsideIntro({ greeting, title, children }: { greeting?: string; title: string; children?: React.ReactNode }) {
   return (
     <>
-      {greeting && <p className="font-display text-xl italic text-dusk-soft">{greeting}</p>}
-      <h1 className="font-display text-[2.5rem] font-medium leading-[1.05] tracking-[-0.01em] xl:text-[3.25rem]">{title}</h1>
-      {children && <p className="mt-4 max-w-[34ch] text-[1.0625rem] leading-relaxed text-dusk-soft">{children}</p>}
+      {greeting && <p className="font-display text-[1.0625rem] italic text-dusk-soft sm:text-xl">{greeting}</p>}
+      <h1 className="font-display text-[1.75rem] font-medium leading-[1.1] tracking-[-0.01em] sm:text-[2.5rem] sm:leading-[1.05] xl:text-[3.25rem]">{title}</h1>
+      {children && <p className="mt-4 hidden max-w-[34ch] sm:block text-[1.0625rem] leading-relaxed text-dusk-soft">{children}</p>}
     </>
   );
 }
@@ -93,18 +93,18 @@ export type CardLine = { label: string; value: string | null; note?: string | nu
  */
 export function AppointmentCard({ heading, lines, footer, className = "" }: { heading: string; lines: CardLine[]; footer?: React.ReactNode; className?: string }) {
   return (
-    <div className={`rounded-[0.25rem] bg-surface px-5 pb-5 pt-4 text-ink shadow-[0_1px_0_rgba(0,0,0,0.25),0_14px_30px_-12px_rgba(0,0,0,0.55)] ${className}`}>
-      <p className="flex items-baseline justify-between gap-4 border-b-2 border-ink pb-2">
-        <span className="font-display text-xl font-medium italic">{heading}</span>
+    <div className={`rounded-[0.25rem] bg-surface px-4 pb-3 pt-3 text-ink sm:px-5 sm:pb-5 sm:pt-4 shadow-[0_1px_0_rgba(0,0,0,0.25),0_14px_30px_-12px_rgba(0,0,0,0.55)] ${className}`}>
+      <p className="flex items-baseline justify-between gap-4 border-b-2 border-ink pb-1.5 sm:pb-2">
+        <span className="font-display text-lg font-medium italic sm:text-xl">{heading}</span>
         <span className="text-[0.8125rem] text-muted">{PRACTICE.name}</span>
       </p>
       <dl>
         {lines.map((line) => (
-          <div key={line.label} className="card-rule grid grid-cols-[4.25rem_minmax(0,1fr)] items-baseline gap-x-3 py-2.5">
+          <div key={line.label} className="card-rule grid grid-cols-[4.25rem_minmax(0,1fr)] items-baseline gap-x-3 py-1.5 sm:py-2.5">
             <dt className="text-[0.8125rem] text-muted">{line.label}</dt>
             <dd className="min-h-7">
               {line.value && (
-                <span className={`font-display text-[1.3125rem] font-medium leading-tight ${line.struck ? "line-through decoration-flag decoration-2" : ""}`}>{line.value}</span>
+                <span className={`font-display text-[1.1875rem] font-medium leading-tight sm:text-[1.3125rem] ${line.struck ? "line-through decoration-flag decoration-2" : ""}`}>{line.value}</span>
               )}
               {line.note && <span className="block text-[0.8125rem] text-muted">{line.note}</span>}
             </dd>

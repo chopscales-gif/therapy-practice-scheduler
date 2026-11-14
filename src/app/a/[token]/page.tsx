@@ -29,7 +29,7 @@ export default async function AppointmentPage({ params }: PageProps<"/a/[token]"
         <>
           <AsideIntro title={TITLE[appointment.status]} />
           <AppointmentCard
-            className="mt-8 max-w-[26rem]"
+            className="mt-4 max-w-[26rem] sm:mt-8"
             heading={cancelled ? "Cancelled" : "Your appointment"}
             lines={[
               { label: "Day", value: fmtDayLong(appointment.startsAt), struck: cancelled },

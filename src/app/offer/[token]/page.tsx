@@ -36,7 +36,7 @@ export default async function OfferPage({ params }: PageProps<"/offer/[token]">)
         <>
           <AsideIntro greeting={`Hello ${client.name.split(" ")[0]},`} title={HEADING[offer.status]} />
           <AppointmentCard
-            className="mt-8 max-w-[26rem]"
+            className="mt-4 max-w-[26rem] sm:mt-8"
             heading={offer.status === "accepted" ? "Your appointment" : gone ? "No longer held" : "Held for you"}
             lines={[
               { label: "Day", value: fmtDayLong(opening.startsAt), struck: gone },
@@ -51,11 +51,11 @@ export default async function OfferPage({ params }: PageProps<"/offer/[token]">)
       <div className="max-w-[40rem]">
         {offer.status === "sent" && (
           <>
-            <p className="border-l-4 border-amber bg-amber-tint px-4 py-3 text-[1.0625rem] leading-relaxed">
+            <p className="border-l-4 border-amber bg-amber-tint px-4 py-2.5 leading-snug sm:py-3 sm:text-[1.0625rem] sm:leading-relaxed">
               Held for you until <strong className="font-semibold">{fmtTime(offer.expiresAt)}</strong> ({countOf(minutesLeft, "minute")} from now). After
               that it goes to the next person waiting.
             </p>
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-start">
+            <div className="mt-4 flex flex-col gap-3 sm:mt-6 sm:flex-row sm:items-start">
               <ActionButton action={respondToOfferAction.bind(null, token, "accept")} pendingLabel="Booking">
                 Take this time
               </ActionButton>
