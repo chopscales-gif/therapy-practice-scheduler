@@ -25,13 +25,22 @@ Booking has the same shape. Clients call during the day, when the therapists are
 
 ## Try it
 
-Three things worth clicking first:
+The quickest way in is **Play the story** in the bar at the top. It takes about two minutes and drives the real screens: a client books, a client cancels, the time is offered to the waitlist and taken. The page dims around the part being shown, and you can stop it at any point.
+
+Then try it by hand:
 
 1. Switch to **Practice side** and press **Corinne cancels**. Her 3:00 PM tomorrow is offered to Maya, who has waited longest among the people it suits. Press **Open the link Maya received** and take the time as her.
-2. Reset the demo, do the same, and this time press **Skip 20 minutes** in the top bar instead of answering. Maya's offer lapses and the time passes to the next person, with the whole story on the timeline.
+2. Press **Reset**, do the same, and this time press **Skip 20 min** in the top bar instead of answering. Maya's offer lapses and the time passes to the next person, with the whole story on the timeline.
 3. On the **Client side**, book an appointment as the sample client, then find it on the practice calendar and open the **Outbox** to read the messages it produced.
 
-The demo runs on its own clock, shown in the top bar. Time only moves when you skip it. **Reset demo** puts everything back.
+Also in the top bar and on the pages:
+
+- **Use your practice's name** puts a name you type on every screen in place of Larkspur, for your visit only. The sample people and data stay invented.
+- **Continue on your phone** shows a code to scan, so you can answer a waitlist offer on a phone while the practice side updates on the big screen.
+- **Try to fool it**, under the booking form, asks the server for three bookings the screens never offer: a time someone already has, a session that has already started, and video with a therapist who is in person only. Each is refused by the same rules every screen goes through.
+- **About** is a plain summary of what the demo showed and what a real version would connect to.
+
+The demo runs on its own clock, shown in the top bar. Time only moves when you skip it. **Reset** puts everything back.
 
 ![The practice side: what happened to a cancelled appointment](docs/cancellations.png)
 

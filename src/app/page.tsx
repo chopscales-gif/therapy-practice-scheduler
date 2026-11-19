@@ -1,5 +1,7 @@
 import { BookingFlow, type SlotOption, type WeekOption } from "@/components/booking-flow";
+import { FoolIt } from "@/components/fool-it";
 import { addDays, dayKey, dayOf, fmtTime, mondayOf, zonedTime, ZONE } from "@/lib/time";
+import { foolAction } from "@/server/actions";
 import { bookableSlots } from "@/server/queries";
 import { getCtx } from "@/server/session";
 
@@ -37,6 +39,18 @@ export default async function BookingPage() {
       therapists={therapists.map(({ id, name, credentials, focus, offersVideo }) => ({ id, name, credentials, focus, offersVideo }))}
       slots={options}
       weeks={weeks}
-    />
+    >
+      <FoolIt
+        className="mt-12"
+        attempts={[
+          { label: "Book a time someone already has", run: foolAction.bind(null, "taken") },
+          { label: "Book a session that has already started", run: foolAction.bind(null, "past") },
+          { label: "Book video with someone who is in person only", run: foolAction.bind(null, "video") },
+        ]}
+      >
+        This page only ever offers times that are really open. These buttons go round the page and ask the booking rules for something they should
+        refuse. Each one is a real request, and the answer shown is the app&apos;s own.
+      </FoolIt>
+    </BookingFlow>
   );
 }

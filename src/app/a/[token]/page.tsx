@@ -2,48 +2,71 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActionButton } from "@/components/action-button";
-import { AppointmentCard, AsideIntro, DemoHint, SiteFrame } from "@/components/site";
-import { MODE_LABEL, PRACTICE, REMINDER_HOURS, SESSION_MINUTES } from "@/lib/practice";
+import { AppointmentCard, DemoHint, SiteFrame } from "@/components/site";
+import { MODE_LABEL, REMINDER_HOURS, SESSION_MINUTES } from "@/lib/practice";
 import { fmtDayLong, fmtTime } from "@/lib/time";
+import { tone } from "@/lib/tones";
 import { cancelByTokenAction, confirmAction } from "@/server/actions";
 import { appointmentByToken } from "@/server/queries";
 import { getCtx } from "@/server/session";
 
 export const metadata: Metadata = { title: "Your appointment" };
 
-const TITLE = { cancelled: "This appointment is cancelled", completed: "This appointment has passed", confirmed: "You are confirmed", booked: "Your appointment is booked" };
+const TITLE = {
+  booked: ["Your appointment", "is booked."],
+  confirmed: ["You are", "confirmed."],
+  cancelled: ["This appointment", "is cancelled."],
+  completed: ["This appointment", "has passed."],
+};
 
 export default async function AppointmentPage({ params }: PageProps<"/a/[token]">) {
   const { token } = await params;
   const ctx = await getCtx();
   const view = await appointmentByToken(ctx, token);
   if (!view) notFound();
-  const { appointment, therapist } = view;
+  const { appointment, therapist, client } = view;
   const upcoming = appointment.startsAt > ctx.now;
   const active = appointment.status === "booked" || appointment.status === "confirmed";
   const cancelled = appointment.status === "cancelled";
+  const [lead, picked] = TITLE[appointment.status];
 
   return (
     <SiteFrame
-      aside={
+      greeting={`Hello ${client.name.split(" ")[0]},`}
+      title={
         <>
-          <AsideIntro title={TITLE[appointment.status]} />
-          <AppointmentCard
-            className="mt-4 max-w-[26rem] sm:mt-8"
-            heading={cancelled ? "Cancelled" : "Your appointment"}
-            lines={[
-              { label: "Day", value: fmtDayLong(appointment.startsAt), struck: cancelled },
-              { label: "Time", value: fmtTime(appointment.startsAt), note: `${SESSION_MINUTES} minutes, Mountain Time`, struck: cancelled },
-              { label: "With", value: therapist.name, note: therapist.credentials },
-              { label: "Where", value: MODE_LABEL[appointment.mode] },
-            ]}
-          />
+          {lead} <em className={cancelled ? "!text-flag" : ""}>{picked}</em>
         </>
+      }
+      card={
+        <AppointmentCard
+          story="appointment"
+          heading={cancelled ? "Cancelled" : "Your appointment"}
+          lines={[
+            { label: "Day", value: fmtDayLong(appointment.startsAt), struck: cancelled },
+            { label: "Time", value: fmtTime(appointment.startsAt), note: `${SESSION_MINUTES} minutes, Mountain Time`, struck: cancelled },
+            { label: "With", value: therapist.name, note: therapist.credentials },
+            { label: "Where", value: MODE_LABEL[appointment.mode] },
+          ]}
+        />
       }
     >
       {active && upcoming && (
-        <section className="max-w-[40rem]">
-          <h2 className="font-display text-[1.625rem] font-medium leading-tight">
+        <section className="max-w-[44rem]">
+          {appointment.status === "booked" ? (
+            <p>
+              <span className="pill" style={tone("waiting")}>
+                Not confirmed yet
+              </span>
+            </p>
+          ) : (
+            <p data-story="confirmed" className="arrive inline-block">
+              <span className="pill" style={tone("good")}>
+                Confirmed
+              </span>
+            </p>
+          )}
+          <h2 className="mt-3 font-display text-[1.7rem] font-medium leading-tight text-dusk">
             {appointment.status === "booked" ? "Let us know you are coming" : "See you then"}
           </h2>
           <p className="mt-2 text-[1.0625rem] leading-relaxed text-ink-soft">
@@ -59,7 +82,7 @@ export default async function AppointmentPage({ params }: PageProps<"/a/[token]"
           )}
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-start">
             {appointment.status === "booked" && (
-              <ActionButton action={confirmAction.bind(null, token)} pendingLabel="Confirming">
+              <ActionButton story="confirm" action={confirmAction.bind(null, token)} pendingLabel="Confirming">
                 Confirm I will be there
               </ActionButton>
             )}
@@ -69,22 +92,18 @@ export default async function AppointmentPage({ params }: PageProps<"/a/[token]"
           </div>
           <p className="mt-8 border-t border-line pt-4 text-[0.9375rem] leading-relaxed text-muted">
             Reminders go out {REMINDER_HOURS[0]} hours and {REMINDER_HOURS[1]} hours before, with a link back to this page. Need a different time? Call{" "}
-            <span className="whitespace-nowrap">{PRACTICE.phone}</span>.
+            <span className="whitespace-nowrap">{ctx.practice.phone}</span>.
           </p>
         </section>
       )}
 
-      {cancelled && (
-        <p className="max-w-[40rem] text-[1.0625rem] leading-relaxed">
-          Nothing more is needed from you. <Link href="/" className="font-semibold text-accent underline">Book another time</Link> whenever you are ready, or
-          call <span className="whitespace-nowrap">{PRACTICE.phone}</span>.
-        </p>
-      )}
-
-      {!cancelled && !(active && upcoming) && (
-        <p className="max-w-[40rem] text-[1.0625rem] leading-relaxed">
-          <Link href="/" className="font-semibold text-accent underline">Book another time</Link> whenever you are ready, or call{" "}
-          <span className="whitespace-nowrap">{PRACTICE.phone}</span>.
+      {!(active && upcoming) && (
+        <p className="max-w-[44rem] text-[1.0625rem] leading-relaxed">
+          {cancelled && "Nothing more is needed from you. "}
+          <Link href="/" className="font-bold text-accent underline">
+            Book another time
+          </Link>{" "}
+          whenever you are ready, or call <span className="whitespace-nowrap">{ctx.practice.phone}</span>.
         </p>
       )}
 
@@ -92,13 +111,18 @@ export default async function AppointmentPage({ params }: PageProps<"/a/[token]"
         {cancelled ? (
           <>
             The time you gave up went straight to the waitlist. See what happened to it under{" "}
-            <Link href="/practice/cancellations" className="font-semibold underline">Practice side, Cancellations</Link>.
+            <Link href="/practice/cancellations" className="font-bold underline">
+              Practice side, Cancellations
+            </Link>
+            .
           </>
         ) : (
           <>
             This is the page a client reaches from the link in their confirmation and reminders. The messages themselves are in{" "}
-            <Link href="/practice/outbox" className="font-semibold underline">Practice side, Outbox</Link>. Cancel here and the waitlist is offered the time
-            straight away.
+            <Link href="/practice/outbox" className="font-bold underline">
+              Practice side, Outbox
+            </Link>
+            . Cancel here and the waitlist is offered the time straight away.
           </>
         )}
       </DemoHint>

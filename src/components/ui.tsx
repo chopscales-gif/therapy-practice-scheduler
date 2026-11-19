@@ -1,35 +1,53 @@
 import type { AppointmentStatus, OpeningStatus } from "@/db/schema";
+import { tone, type Tone } from "@/lib/tones";
 
-const chip = "inline-flex items-center whitespace-nowrap rounded-[0.25rem] border px-2.5 py-0.5 text-[0.875rem] font-semibold";
+/** A solid status pill. The colour is the meaning. */
+export function Pill({ is, children }: { is: Tone; children: React.ReactNode }) {
+  return (
+    <span className="pill" style={tone(is)}>
+      {children}
+    </span>
+  );
+}
 
-const APPOINTMENT: Record<AppointmentStatus, { label: string; className: string }> = {
-  booked: { label: "Not yet confirmed", className: "border-accent/40 bg-accent-tint text-accent-deep" },
-  confirmed: { label: "Confirmed", className: "border-good/30 bg-good-tint text-good" },
-  cancelled: { label: "Cancelled", className: "border-flag/30 bg-flag-tint text-flag" },
-  completed: { label: "Completed", className: "border-line bg-paper text-muted" },
+const APPOINTMENT: Record<AppointmentStatus, { label: string; is: Tone }> = {
+  booked: { label: "Not confirmed yet", is: "waiting" },
+  confirmed: { label: "Confirmed", is: "good" },
+  cancelled: { label: "Cancelled", is: "gone" },
+  completed: { label: "Completed", is: "done" },
 };
 
 export function AppointmentChip({ status }: { status: AppointmentStatus }) {
-  const { label, className } = APPOINTMENT[status];
-  return <span className={`${chip} ${className}`}>{label}</span>;
+  const { label, is } = APPOINTMENT[status];
+  return <Pill is={is}>{label}</Pill>;
 }
 
-const OPENING: Record<OpeningStatus, { label: string; className: string }> = {
-  offering: { label: "Offering now", className: "border-dashed border-amber bg-amber-tint text-amber" },
-  filled: { label: "Filled from the waitlist", className: "border-good bg-good text-white" },
-  unfilled: { label: "Not filled", className: "border-line bg-paper text-muted" },
+const OPENING: Record<OpeningStatus, { label: string; is: Tone }> = {
+  offering: { label: "Offering now", is: "waiting" },
+  filled: { label: "Filled from the waitlist", is: "waitlist" },
+  unfilled: { label: "Not filled", is: "gone" },
 };
 
 export function OpeningChip({ status }: { status: OpeningStatus }) {
-  const { label, className } = OPENING[status];
-  return <span className={`${chip} ${className}`}>{label}</span>;
+  const { label, is } = OPENING[status];
+  return <Pill is={is}>{label}</Pill>;
 }
 
 export function PageHeader({ title, children }: { title: string; children?: React.ReactNode }) {
   return (
-    <div className="mb-7">
-      <h1 className="font-display text-[2.25rem] font-medium leading-[1.1] tracking-[-0.01em] lg:text-[2.625rem]">{title}</h1>
-      {children && <p className="mt-2 max-w-[68ch] text-[1.0625rem] leading-relaxed text-muted">{children}</p>}
+    <div className="mb-6">
+      <h1 className="font-display text-[2.25rem] font-medium leading-[1.05] tracking-[-0.01em] text-dusk lg:text-[2.6rem]">{title}</h1>
+      {children && <p className="mt-2 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-soft">{children}</p>}
+    </div>
+  );
+}
+
+/** One small-capital label over one bold value. */
+export function Fact({ label, children, className = "" }: { label: string; children: React.ReactNode; className?: string }) {
+  return (
+    <div className={className}>
+      <dt className="eyebrow">{label}</dt>
+      <dd className="mt-0.5 text-[1.0625rem] font-bold leading-snug">{children}</dd>
     </div>
   );
 }
@@ -37,7 +55,7 @@ export function PageHeader({ title, children }: { title: string; children?: Reac
 /** The line that says, wherever personal details are typed, that this is not a real practice. */
 export function FakeDetailsNote() {
   return (
-    <p className="rounded-[0.25rem] border border-dashed border-amber bg-amber-tint/60 px-3 py-2 text-[0.9375rem] leading-snug text-amber">
+    <p className="rounded-[0.375rem] border-[1.5px] border-dashed border-amber bg-amber-tint/60 px-3 py-2 text-[0.9375rem] leading-snug text-amber">
       This is a demo. Use made-up details and do not enter real personal or health information.
     </p>
   );

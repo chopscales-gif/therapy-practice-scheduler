@@ -1,14 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AsideIntro, SiteFrame } from "@/components/site";
+import { SiteFrame } from "@/components/site";
 
 export const metadata: Metadata = { title: "Cookies are needed" };
 
 /** Shown by the proxy when the sandbox cookie was offered and did not come back. */
 export default function CookiesNeeded() {
   return (
-    <SiteFrame aside={<AsideIntro title="This demo needs cookies switched on" />}>
-      <section className="max-w-[40rem]">
+    <SiteFrame
+      title={
+        <>
+          This demo needs cookies <em>switched on.</em>
+        </>
+      }
+    >
+      <section className="max-w-[44rem]">
         <p className="text-[1.0625rem] leading-relaxed text-ink-soft">
           Every visitor gets a private copy of the sample data, so that what you book or cancel is yours alone. One cookie remembers which copy is yours.
           It holds a random id and nothing about you, and it expires after two days.

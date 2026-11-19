@@ -2,19 +2,27 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useFormStatus } from "react-dom";
-import { resetDemoAction, skipAheadAction } from "@/server/actions";
+import { DEMO_PRACTICE, PRACTICE_NAME_MAX, type Practice } from "@/lib/practice";
+import { resetDemoAction, setPracticeNameAction, skipAheadAction } from "@/server/actions";
 import type { ClockStep } from "@/server/workflow";
+import { HandoffCard } from "./handoff";
+import { useStory } from "./story";
+
+const control = "inline-flex min-h-11 cursor-pointer items-center whitespace-nowrap rounded-[0.375rem] px-2.5 font-bold lg:min-h-9";
+const underlined = `${control} underline decoration-ink/40 underline-offset-4 hover:decoration-ink disabled:cursor-not-allowed disabled:opacity-60`;
+const outlined = `${control} border-[1.5px] border-ink hover:bg-ink/10 disabled:cursor-not-allowed disabled:opacity-60`;
 
 /**
  * The strip across the top of every page. It is the only part of the screen
- * that belongs to the demo rather than to the fictional practice's product:
- * which side you are looking at, what time it is in the demo, and a reset.
+ * that belongs to the demo rather than to the practice's product: it says what
+ * this is, then holds the things a visitor can try. One row on a laptop.
  */
-export function DemoBar({ clock }: { clock: string | null }) {
+export function DemoBar({ clock, practice }: { clock: string | null; practice: Practice }) {
   const pathname = usePathname();
   const practiceSide = pathname.startsWith("/practice");
+  const story = useStory();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -27,17 +35,30 @@ export function DemoBar({ clock }: { clock: string | null }) {
   }
 
   const tab = (active: boolean) =>
-    `flex min-h-11 items-center rounded-[0.25rem] px-3 font-semibold lg:min-h-9 ${active ? "bg-ink text-white" : "text-ink hover:bg-ink/10"}`;
-  const step = `${BUTTON} disabled:opacity-60`;
+    `inline-flex min-h-11 items-center whitespace-nowrap rounded-[0.25rem] px-3 font-bold lg:min-h-9 ${active ? "bg-ink text-white" : "text-ink hover:bg-ink/10"}`;
+  const problem = story.error ?? error;
 
   return (
-    <div className="demo-chrome border-b border-dashed border-amber bg-amber-tint text-sm text-ink">
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 px-4 py-1.5 sm:gap-y-2 sm:px-6 sm:py-2">
-        <p className="min-w-0 flex-1 basis-64 leading-snug">
-          <strong className="font-semibold">Demonstration build.</strong> <span className="sm:hidden">Fictional practice. Nothing is sent.</span>
-          <span className="hidden sm:inline">A fictional practice with invented people. Nothing is sent.</span>
+    <div className="demo-chrome border-b-[1.5px] border-dashed border-amber bg-amber-tint text-[0.9375rem] text-ink">
+      <div className="flex flex-wrap items-center gap-x-1 gap-y-1 px-4 py-1.5 sm:px-6">
+        <p className="min-w-0 flex-1 basis-64 pr-3 leading-snug">
+          <strong className="font-bold">Demonstration build.</strong>{" "}
+          {/* A visitor's own practice is real, so with their name showing the bar says whose data is invented, and never that the practice is. */}
+          {practice.custom ? (
+            "Your practice's name is shown on invented sample data. Nothing is sent."
+          ) : (
+            <>
+              <span className="sm:hidden">Fictional practice. Nothing is sent.</span>
+              <span className="hidden sm:inline">{DEMO_PRACTICE.shortName} is a fictional practice, the people are invented, and nothing is sent.</span>
+            </>
+          )}{" "}
+          {/* On a phone there is no room for this link among the controls, so it closes the sentence. */}
+          <Link href="/about" className="whitespace-nowrap font-bold underline decoration-ink/40 underline-offset-4 md:hidden">
+            About this demo
+          </Link>
         </p>
-        <nav aria-label="Demo view" className="flex items-center gap-1 rounded-[0.375rem] border border-ink/25 p-0.5">
+        {/* Last on a laptop, where it ends the strip. On a phone it stays beside the notice. */}
+        <nav aria-label="Demo view" className="flex items-center gap-0.5 rounded-[0.4375rem] border-[1.5px] border-ink p-0.5 xl:order-last xl:ml-2">
           <Link href="/" className={tab(!practiceSide)} aria-current={!practiceSide ? "page" : undefined}>
             Client side
           </Link>
@@ -45,43 +66,47 @@ export function DemoBar({ clock }: { clock: string | null }) {
             Practice side
           </Link>
         </nav>
+        <button
+          type="button"
+          data-story="play"
+          onClick={story.start}
+          disabled={story.busy}
+          className={`${control} gap-2 bg-ink px-3.5 text-white hover:bg-dusk-mid disabled:cursor-not-allowed disabled:opacity-60`}
+        >
+          <svg aria-hidden viewBox="0 0 12 12" className="size-3 fill-current">
+            <path d="M2 1l9 5-9 5z" />
+          </svg>
+          {story.busy ? "Playing the story" : "Play the story"}
+        </button>
+        <PracticeName key={practice.custom ? practice.name : ""} practice={practice} />
+        <PhoneHandoff path={pathname} />
+        <Link href="/about" aria-current={pathname === "/about" ? "page" : undefined} className={`${underlined} max-md:hidden`}>
+          About
+        </Link>
         {clock && (
-          <form action={resetDemoAction}>
-            <ResetButton />
-          </form>
+          <>
+            <p className="ml-1 inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-[0.375rem] border border-amber/60 bg-surface/70 px-2.5 leading-none" title="Time only moves when you skip it, so you can watch reminders go out and offers lapse.">
+              <span className="text-[0.8125rem] font-bold uppercase tracking-[0.06em] text-amber">Demo clock</span>
+              <strong className="font-bold tabular-nums max-sm:hidden">{clock}</strong>
+              <strong className="font-bold tabular-nums sm:hidden">{shortClock(clock)}</strong>
+            </p>
+            <button type="button" className={underlined} disabled={pending || story.busy} onClick={() => skip("20min")}>
+              Skip 20 min
+            </button>
+            <button type="button" className={underlined} disabled={pending || story.busy} onClick={() => skip("tomorrow")}>
+              Skip to tomorrow
+            </button>
+            <form action={resetDemoAction}>
+              <ResetButton />
+            </form>
+          </>
+        )}
+        {problem && (
+          <p role="alert" className="order-last basis-full pb-1 font-bold text-flag">
+            {problem}
+          </p>
         )}
       </div>
-      {clock && (
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 border-t border-amber/25 px-4 py-1.5 sm:gap-x-4 sm:gap-y-2 sm:px-6 sm:py-2">
-          <p className="hidden leading-snug sm:block">
-            Demo clock: <strong className="font-semibold tabular-nums">{clock}</strong>
-          </p>
-          {/* On a phone the clock is two short lines beside the skip buttons, so the bar stays small. */}
-          <p className="mr-auto leading-tight sm:hidden">
-            <span className="block text-[0.8125rem]">Demo clock</span>
-            <strong className="block font-semibold tabular-nums">{shortClock(clock)}</strong>
-          </p>
-          <div className="flex flex-wrap items-center gap-2">
-            <button type="button" className={step} disabled={pending} onClick={() => skip("20min")}>
-              Skip 20 minutes
-            </button>
-            <button type="button" className={step} disabled={pending} onClick={() => skip("tomorrow")}>
-              <span className="sr-only sm:not-sr-only">Skip to </span>
-              <span className="sm:hidden">Tomorrow, 8 AM</span>
-              <span className="hidden sm:inline">tomorrow, 8 AM</span>
-            </button>
-          </div>
-          {error ? (
-            <p key="error" role="alert" className="min-w-0 flex-1 basis-64 font-semibold leading-snug text-flag">
-              {error}
-            </p>
-          ) : (
-            <p key="hint" className="hidden min-w-0 flex-1 basis-64 leading-snug text-amber sm:block">
-              Time only moves when you skip it, so you can watch reminders go out and offers lapse.
-            </p>
-          )}
-        </div>
-      )}
     </div>
   );
 }
@@ -92,13 +117,133 @@ function shortClock(clock: string) {
   return time ? `${date.split(",")[0]}, ${time}` : clock;
 }
 
-const BUTTON = "min-h-11 cursor-pointer rounded-[0.25rem] border border-ink/40 px-2.5 sm:px-3 font-semibold hover:border-ink hover:bg-ink/5 lg:min-h-9";
+/** The one question the demo asks: the visitor's practice name, shown in place of the fictional one. */
+function PracticeName({ practice }: { practice: Practice }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  function save(name: string | null) {
+    setError(null);
+    startTransition(async () => {
+      const result = await setPracticeNameAction(name);
+      if (!result.ok) return setError(result.error);
+      setEditing(false);
+      setDraft("");
+    });
+  }
+
+  function submit(event: React.FormEvent) {
+    event.preventDefault();
+    if (!draft.trim()) return setError("Type your practice's name first.");
+    save(draft);
+  }
+
+  if (practice.custom && !editing) {
+    return (
+      <div className="flex min-w-0 flex-wrap items-center gap-x-1 gap-y-1">
+        <p className="min-w-0 max-w-full px-1 leading-snug sm:max-w-[22rem] sm:truncate" title={practice.name}>
+          Shown as <strong className="font-bold [overflow-wrap:anywhere]">{practice.name}</strong>
+        </p>
+        <button type="button" onClick={() => setEditing(true)} disabled={pending} className={underlined}>
+          Change
+        </button>
+        <button type="button" onClick={() => save(null)} disabled={pending} className={underlined}>
+          {pending ? "Putting it back" : `Back to ${DEMO_PRACTICE.shortName}`}
+        </button>
+        {error && (
+          <p role="alert" className="basis-full font-bold text-flag">
+            {error}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {/* The question folds into one button, so the bar stays one row until it is asked. */}
+      {!editing && (
+        <button type="button" onClick={() => setEditing(true)} className={underlined}>
+          Use your practice&apos;s name
+        </button>
+      )}
+      <form onSubmit={submit} className={`min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5 ${editing ? "order-last flex basis-full pb-1" : "hidden"}`}>
+        <label htmlFor="practice-name" className="font-bold">
+          What&apos;s your practice called?
+        </label>
+        <input
+          id="practice-name"
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          maxLength={PRACTICE_NAME_MAX}
+          autoComplete="organization"
+          placeholder="Optional"
+          aria-describedby={error ? "practice-name-error" : undefined}
+          className="min-h-11 w-full min-w-0 rounded-[0.375rem] border-[1.5px] border-ink bg-white px-3 text-base text-ink placeholder:text-muted sm:w-72 lg:min-h-9"
+        />
+        <button type="submit" disabled={pending} className={outlined}>
+          {pending ? "Showing it" : "Show it"}
+        </button>
+        {editing && (
+          <button type="button" onClick={() => (setEditing(false), setError(null), setDraft(""))} className={underlined}>
+            Cancel
+          </button>
+        )}
+        <span className="text-ink-soft">Only the name changes. The people and the data stay invented.</span>
+        {error && (
+          <p id="practice-name-error" role="alert" className="basis-full font-bold text-flag">
+            {error}
+          </p>
+        )}
+      </form>
+    </>
+  );
+}
+
+/** "Continue on your phone": moves the page the visitor is on to a second device. Not offered on a phone. */
+function PhoneHandoff({ path }: { path: string }) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const [open, setOpen] = useState(false);
+
+  function show() {
+    setOpen(true);
+    dialog.current?.showModal();
+  }
+
+  return (
+    <>
+      <button type="button" onClick={show} className={`${underlined} max-md:hidden`}>
+        Continue on your phone
+      </button>
+      <dialog ref={dialog} onClose={() => setOpen(false)} aria-labelledby="handoff-title" className="demo-dialog m-auto w-[min(34rem,calc(100vw-2rem))] p-6 text-base text-ink">
+        <p className="eyebrow !text-amber">In this demo</p>
+        <h2 id="handoff-title" className="mt-1 font-display text-[1.75rem] font-medium leading-tight text-dusk">
+          Continue on your phone
+        </h2>
+        <div className="mt-4">
+          {open && (
+            <HandoffCard path={path}>
+              Point your phone&apos;s camera at the code. This page opens on your phone with the same sample data, and anything you do there shows up here.
+            </HandoffCard>
+          )}
+        </div>
+        <form method="dialog" className="mt-5 flex justify-end">
+          <button type="submit" className="btn btn-quiet">
+            Close
+          </button>
+        </form>
+      </dialog>
+    </>
+  );
+}
 
 function ResetButton() {
   const { pending } = useFormStatus();
   return (
-    <button type="submit" disabled={pending} className={`${BUTTON} disabled:opacity-60`}>
-      {pending ? "Resetting" : "Reset demo"}
+    <button type="submit" disabled={pending} className={underlined}>
+      {pending ? "Resetting" : "Reset"}
     </button>
   );
 }

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActionButton } from "@/components/action-button";
-import { AppointmentChip } from "@/components/ui";
+import { AppointmentChip, Fact, Pill } from "@/components/ui";
 import { MODE_LABEL, OFFER_CUTOFF_HOURS, OFFER_WINDOW_MINUTES } from "@/lib/practice";
 import { dayKey, dayOf, fmtDateTime, fmtDateTimeLong, mondayOf } from "@/lib/time";
 import { cancelAction } from "@/server/actions";
@@ -28,83 +28,88 @@ export default async function AppointmentDetailPage({ params }: PageProps<"/prac
   ]);
 
   return (
-    <div className="max-w-[68rem]">
-      <Link href={`/practice?t=${therapist.id}&w=${dayKey(mondayOf(dayOf(appointment.startsAt)))}`} className="inline-flex min-h-11 items-center font-semibold text-accent underline">
+    <div className="max-w-[72rem]">
+      <Link href={`/practice?t=${therapist.id}&w=${dayKey(mondayOf(dayOf(appointment.startsAt)))}`} className="inline-flex min-h-11 items-center font-bold text-accent underline">
         Back to the calendar
       </Link>
-      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2">
-        <h1 className="font-display text-[2.25rem] font-medium leading-[1.1] tracking-[-0.01em] lg:text-[2.625rem]">{client.name}</h1>
+      <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-2">
+        <h1 className="font-display text-[2.25rem] font-medium leading-[1.05] tracking-[-0.01em] text-dusk lg:text-[2.6rem]">{client.name}</h1>
         <AppointmentChip status={appointment.status} />
       </div>
-      <p className="mt-2 text-lg">
-        {fmtDateTimeLong(appointment.startsAt)} with {therapist.name}, {MODE_LABEL[appointment.mode].toLowerCase()}
-      </p>
 
-      <div className="mt-8 grid gap-x-12 gap-y-10 xl:grid-cols-2">
-      <div>
-      <dl className="grid gap-x-8 gap-y-4 border-t-2 border-ink pt-4 sm:grid-cols-2">
-        <div>
-          <dt className="text-sm text-muted">Contact</dt>
-          <dd className="mt-0.5">{client.phone}</dd>
-          <dd className="break-all">{client.email}</dd>
-          <dd className="text-sm text-muted">Prefers {client.contactBy === "text" ? "text messages" : "email"}</dd>
+      <div className="mt-5 grid items-start gap-5 xl:grid-cols-2">
+        <div className="grid gap-5">
+          <section className="panel px-5 py-4">
+            <dl className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
+              <Fact label="When">{fmtDateTimeLong(appointment.startsAt)}</Fact>
+              <Fact label="With">
+                {therapist.name}
+                <span className="block text-[0.9375rem] font-normal text-ink-soft">{MODE_LABEL[appointment.mode]}</span>
+              </Fact>
+              <Fact label="Contact">
+                {client.phone}
+                <span className="block break-all text-[0.9375rem] font-normal text-ink-soft">{client.email}</span>
+                <span className="block text-[0.875rem] font-normal text-muted">Prefers {client.contactBy === "text" ? "text messages" : "email"}</span>
+              </Fact>
+              <Fact label="How it was booked">
+                {SOURCE[appointment.source]}
+                <span className="block text-[0.875rem] font-normal text-muted">{fmtDateTime(appointment.createdAt)}</span>
+              </Fact>
+            </dl>
+          </section>
+
+          <section className="panel px-5 py-4">
+            <h2 className="eyebrow">Reminders</h2>
+            <ul className="mt-1 divide-y divide-line">
+              {reminders.map((reminder) => (
+                <li key={reminder.id} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2.5">
+                  <span>
+                    <strong className="font-bold">{reminder.hoursBefore} hours before</strong>, {fmtDateTime(reminder.dueAt)}
+                  </span>
+                  {reminder.status === "sent" ? (
+                    <Pill is="good">Sent</Pill>
+                  ) : reminder.status === "cancelled" ? (
+                    <Pill is="gone">Not sent, cancelled</Pill>
+                  ) : (
+                    <Pill is="open">Scheduled</Pill>
+                  )}
+                </li>
+              ))}
+              {reminders.length === 0 && <li className="py-2.5 text-muted">No reminders for this appointment.</li>}
+            </ul>
+          </section>
+
+          {opening && (
+            <p className="panel border-l-[6px] !border-l-flag px-5 py-4 leading-relaxed">
+              <strong className="font-bold">Cancelled {appointment.cancelledAt ? fmtDateTime(appointment.cancelledAt) : ""}.</strong>{" "}
+              <Link href={`/practice/cancellations#${opening.id}`} className="font-bold text-accent underline">
+                See what happened to the time
+              </Link>
+              .
+            </p>
+          )}
         </div>
-        <div>
-          <dt className="text-sm text-muted">How it was booked</dt>
-          <dd className="mt-0.5">{SOURCE[appointment.source]}</dd>
-          <dd className="text-sm text-muted">{fmtDateTime(appointment.createdAt)}</dd>
-        </div>
-      </dl>
-
-      <section className="mt-8">
-        <h2 className="font-display text-2xl font-medium">Reminders</h2>
-        <ul className="panel mt-3 divide-y divide-line">
-          {reminders.map((reminder) => (
-            <li key={reminder.id} className="flex flex-wrap items-baseline justify-between gap-x-4 px-5 py-3">
-              <span>
-                {reminder.hoursBefore} hours before, {fmtDateTime(reminder.dueAt)}
-              </span>
-              <span className={reminder.status === "sent" ? "font-semibold text-good" : "text-muted"}>
-                {reminder.status === "sent" ? "Sent" : reminder.status === "cancelled" ? "Not sent, appointment cancelled" : "Scheduled"}
-              </span>
-            </li>
-          ))}
-          {reminders.length === 0 && <li className="px-5 py-3 text-muted">No reminders for this appointment.</li>}
-        </ul>
-      </section>
-
-      {opening && (
-        <p className="mt-8 leading-relaxed">
-          Cancelled {appointment.cancelledAt ? fmtDateTime(appointment.cancelledAt) : ""}.{" "}
-          <Link href={`/practice/cancellations#${opening.id}`} className="font-semibold text-accent underline">
-            See what happened to the time
-          </Link>
-          .
-        </p>
-      )}
-
-      </div>
 
       {preview && (
-        <section className="border-t-2 border-ink pt-4">
-          <h2 className="font-display text-2xl font-medium">If this is cancelled</h2>
+        <section className="panel border-t-[6px] !border-t-accent px-5 py-4">
+          <h2 className="font-display text-2xl font-medium text-dusk">If this is cancelled</h2>
           {preview.tooLate ? (
-            <p className="mt-2 max-w-[65ch] leading-relaxed text-muted">
+            <p className="mt-2 max-w-[65ch] leading-relaxed text-ink-soft">
               It is less than {OFFER_CUTOFF_HOURS} hours away, too late to offer to the waitlist. The time would simply open for the front desk to fill.
             </p>
           ) : preview.eligible.length === 0 ? (
-            <p className="mt-2 max-w-[65ch] leading-relaxed text-muted">Nobody on the waitlist fits this time, so it would open for online booking straight away.</p>
+            <p className="mt-2 max-w-[65ch] leading-relaxed text-ink-soft">Nobody on the waitlist fits this time, so it would open for online booking straight away.</p>
           ) : (
             <>
-              <p className="mt-2 max-w-[65ch] leading-relaxed text-muted">
+              <p className="mt-2 max-w-[65ch] leading-relaxed text-ink-soft">
                 The time is offered to these waitlisted clients in this order, one at a time. Each has {OFFER_WINDOW_MINUTES} minutes to take it before it
                 passes on.
               </p>
-              <ol className="panel mt-3 divide-y divide-line">
+              <ol className="mt-3 divide-y divide-line rounded-[0.375rem] border border-line bg-paper">
                 {preview.eligible.map((verdict, index) => (
-                  <li key={verdict.candidate.entryId} className="flex items-baseline gap-4 px-5 py-3">
-                    <span className="w-5 font-display text-lg italic text-muted">{index + 1}</span>
-                    <span className="flex-1 font-semibold">{verdict.candidate.clientName}</span>
+                  <li key={verdict.candidate.entryId} className="flex flex-wrap items-baseline gap-x-4 px-4 py-3">
+                    <span className="w-5 font-display text-xl font-medium text-accent">{index + 1}</span>
+                    <span className="flex-1 font-bold">{verdict.candidate.clientName}</span>
                     <span className="text-muted">{verdict.reason}</span>
                   </li>
                 ))}
@@ -113,7 +118,7 @@ export default async function AppointmentDetailPage({ params }: PageProps<"/prac
           )}
           {!preview.tooLate && preview.skipped.length > 0 && (
             <details className="group mt-3 border-y border-line">
-              <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 font-semibold text-accent [&::-webkit-details-marker]:hidden">
+              <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 font-bold text-accent [&::-webkit-details-marker]:hidden">
                 <span>
                   {preview.skipped.length} on the waitlist would be skipped, and why
                 </span>
@@ -128,7 +133,7 @@ export default async function AppointmentDetailPage({ params }: PageProps<"/prac
               <ul className="grid gap-1 pb-3 text-[0.9375rem]">
                 {preview.skipped.map((verdict) => (
                   <li key={verdict.candidate.entryId}>
-                    <span className="font-semibold">{verdict.candidate.clientName}:</span> <span className="text-muted">{verdict.reason}</span>
+                    <span className="font-bold">{verdict.candidate.clientName}:</span> <span className="text-muted">{verdict.reason}</span>
                   </li>
                 ))}
               </ul>

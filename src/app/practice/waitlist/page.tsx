@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { PageHeader } from "@/components/ui";
+import { Flash } from "@/components/flash";
+import { PageHeader, Pill } from "@/components/ui";
 import { countOf, fmtDay } from "@/lib/time";
 import { describeDays, describeParts, waitingDays } from "@/lib/waitlist";
 import { listTherapists, waitlistView } from "@/server/queries";
@@ -20,35 +21,59 @@ export default async function WaitlistPage() {
   return (
     <>
       <PageHeader title="Waitlist">
-        {rows.length} waiting, longest first. When an appointment is cancelled, the time goes to the first person here whose days, times and therapist
-        fit it.
+        <strong className="font-bold text-ink">
+          <Flash value={String(rows.length)}>{rows.length} waiting</Flash>
+        </strong>
+        , longest first. When an appointment is cancelled, the time goes to the first person here whose days, times and therapist fit it.
       </PageHeader>
       {rows.length === 0 ? (
-        <p className="max-w-[60ch] border-t-2 border-ink pt-4 text-muted">Nobody is waiting. Clients join from the waitlist page on the practice&apos;s website.</p>
+        <p className="panel max-w-[44rem] px-5 py-4 text-ink-soft">Nobody is waiting. Clients join from the waitlist page on the practice&apos;s website.</p>
       ) : (
-        <ol className="panel max-w-[68rem] divide-y divide-line border-t-2 border-t-ink">
-          {rows.map(({ entry, client, hasLiveOffer }, index) => (
-            <li key={entry.id} className="grid gap-x-6 gap-y-1 px-4 py-4 sm:px-5 md:grid-cols-[2rem_minmax(0,1.2fr)_minmax(0,1.6fr)_10rem] md:items-baseline">
-              <span className="hidden font-display text-xl italic text-muted md:block">{index + 1}</span>
-              <div>
-                <p className="font-semibold">
-                  <span className="mr-2 font-display italic text-muted md:hidden">{index + 1}</span>
-                  {client.name}
-                </p>
-                <p className="text-[0.9375rem] text-muted">{therapistName(entry.therapistId)}</p>
-              </div>
-              <p className="text-[0.9375rem]">
-                {describeDays(entry.days)}. {describeParts(entry.parts)}. {modeLabel(entry.mode, therapistOf(entry.therapistId)?.offersVideo ?? true)}.
-              </p>
-              <div className="md:text-right">
-                <p className="font-semibold">
-                  {waitingDays(entry.joinedAt, ctx.now) === 0 ? "Joined today" : countOf(waitingDays(entry.joinedAt, ctx.now), "day")}
-                </p>
-                {waitingDays(entry.joinedAt, ctx.now) > 0 && <p className="text-[0.875rem] text-muted">since {fmtDay(entry.joinedAt)}</p>}
-                {hasLiveOffer && <p className="mt-1 inline-block rounded-[0.25rem] border border-dashed border-amber bg-amber-tint px-2.5 py-0.5 text-[0.875rem] font-semibold text-amber">Holding an offer now</p>}
-              </div>
-            </li>
-          ))}
+        <ol className="grid max-w-[72rem] gap-2.5">
+          {rows.map(({ entry, client, hasLiveOffer }, index) => {
+            const days = waitingDays(entry.joinedAt, ctx.now);
+            return (
+              <li
+                key={entry.id}
+                className={`panel grid gap-x-6 gap-y-3 px-4 py-4 sm:px-5 md:grid-cols-[2.75rem_minmax(0,1.1fr)_minmax(0,1.7fr)_9.5rem] md:items-center ${
+                  hasLiveOffer ? "!border-wait border-l-[6px] !bg-amber-tint" : ""
+                }`}
+              >
+                <span className="hidden font-display text-[2rem] font-medium leading-none text-accent md:block">{index + 1}</span>
+                <div>
+                  <p className="text-[1.125rem] font-bold leading-tight">
+                    <span className="mr-2 font-display text-accent md:hidden">{index + 1}.</span>
+                    {client.name}
+                  </p>
+                  {hasLiveOffer && (
+                    <p className="mt-1.5">
+                      <Pill is="waiting">Holding an offer now</Pill>
+                    </p>
+                  )}
+                </div>
+                <dl className="grid grid-cols-2 gap-x-5 gap-y-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_minmax(0,1fr)]">
+                  <div>
+                    <dt className="eyebrow">Therapist</dt>
+                    <dd className="font-bold leading-snug">{therapistName(entry.therapistId)}</dd>
+                  </div>
+                  <div>
+                    <dt className="eyebrow">Could come</dt>
+                    <dd className="font-bold leading-snug">{describeDays(entry.days)}</dd>
+                    <dd className="text-[0.9375rem] leading-snug text-ink-soft">{describeParts(entry.parts)}</dd>
+                  </div>
+                  <div>
+                    <dt className="eyebrow">Where</dt>
+                    <dd className="font-bold leading-snug">{modeLabel(entry.mode, therapistOf(entry.therapistId)?.offersVideo ?? true)}</dd>
+                  </div>
+                </dl>
+                <div className="md:text-right">
+                  <p className="eyebrow">Waiting</p>
+                  <p className="font-bold leading-snug">{days === 0 ? "Joined today" : countOf(days, "day")}</p>
+                  {days > 0 && <p className="text-[0.875rem] text-muted">since {fmtDay(entry.joinedAt)}</p>}
+                </div>
+              </li>
+            );
+          })}
         </ol>
       )}
     </>

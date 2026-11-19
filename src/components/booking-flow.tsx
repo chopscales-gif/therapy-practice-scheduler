@@ -6,20 +6,28 @@ import { useMemo, useState, useTransition } from "react";
 import { MODE_LABEL, SESSION_MINUTES, type Mode } from "@/lib/practice";
 import { bookAction } from "@/server/actions";
 import { PersonFields, SAMPLE_PERSON } from "./person-fields";
-import { AppointmentCard, AsideIntro, SiteFrame } from "./site";
+import { AppointmentCard, SiteFrame, StepHeading } from "./site";
 
 export type TherapistOption = { id: string; name: string; credentials: string; focus: string; offersVideo: boolean };
 export type SlotOption = { therapistId: string; iso: string; dayKey: string; weekday: string; date: string; time: string };
 /** One working week of the booking window, Monday to Friday. */
 export type WeekOption = { key: string; label: string; days: { dayKey: string; weekday: string; date: string }[] };
 
-type Props = { therapists: TherapistOption[]; slots: SlotOption[]; weeks: WeekOption[] };
+type Props = { therapists: TherapistOption[]; slots: SlotOption[]; weeks: WeekOption[]; children?: React.ReactNode };
+
+export const initialsOf = (name: string) =>
+  name
+    .split(/[\s-]+/)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
 /**
  * Three choices on one page: who, when, and how to reach you. The appointment
- * card on the practice's panel fills in as they are made.
+ * card beside the headline fills in as they are made.
  */
-export function BookingFlow({ therapists, slots, weeks }: Props) {
+export function BookingFlow({ therapists, slots, weeks, children }: Props) {
   const router = useRouter();
   const [therapistId, setTherapistId] = useState<string>("any");
   const [mode, setMode] = useState<Mode>("office");
@@ -75,91 +83,99 @@ export function BookingFlow({ therapists, slots, weeks }: Props) {
     <button
       key={`${slot.therapistId}|${slot.iso}`}
       type="button"
+      data-story="slot"
       aria-pressed={isPicked(slot)}
       onClick={() => setPicked(slot)}
-      className="choice min-h-11 flex-col items-start justify-center px-3 py-1.5 text-left leading-tight"
+      className="choice min-h-12 flex-col items-start justify-center px-3 py-1.5 text-left leading-tight"
     >
-      <span className="font-semibold tabular-nums">{slot.time}</span>
+      <span className="text-[1.0625rem] font-bold tabular-nums">{slot.time}</span>
       {therapistId === "any" && <span className="choice-note text-[0.8125rem]">{byId.get(slot.therapistId)!.name}</span>}
     </button>
   );
   const pager = "btn btn-quiet min-h-11 px-3.5 py-1.5 text-[0.9375rem]";
+  const nothing = chosen ? `Nothing open with ${chosen.name.split(" ")[0]}` : "Nothing open";
 
   return (
     <SiteFrame
-      aside={
+      loud
+      title={
         <>
-          <AsideIntro title="Book an appointment">
-            Choose a therapist and a time that suits you. You will get a confirmation with a link to confirm or cancel, and reminders before the day.
-          </AsideIntro>
-          <AppointmentCard
-            className="mt-9 hidden lg:block"
-            heading="Your appointment"
-            lines={[
-              { label: "Day", value: selection ? `${selection.weekday}, ${selection.date}` : null },
-              { label: "Time", value: selection?.time ?? null, note: selection ? `${SESSION_MINUTES} minutes, Mountain Time` : null },
-              { label: "With", value: withWhom ? withWhom.name : null, note: withWhom?.credentials },
-              { label: "Where", value: MODE_LABEL[mode] },
-            ]}
-            footer={selection ? "Add your details on the right to book it." : "Pick a time and it is written in here."}
-          />
+          A time that suits you, <em>this week.</em>
         </>
       }
+      lede="Choose who you would like to see and when. You get a link to confirm or cancel, and a reminder before the day."
+      card={
+        <AppointmentCard
+          story="card"
+          heading="Your appointment"
+          lines={[
+            { label: "Who", value: withWhom ? withWhom.name : null, note: withWhom?.credentials },
+            { label: "When", value: selection ? `${selection.weekday}, ${selection.date}` : null, note: selection ? `${selection.time}, ${SESSION_MINUTES} minutes` : null },
+            { label: "Where", value: MODE_LABEL[mode] },
+            { label: "Name", value: selection && person.name.trim() ? person.name.trim() : null },
+          ]}
+          footer={selection ? "Add your details below to book it." : "Pick a time and it is written in here."}
+        />
+      }
     >
-      <form onSubmit={submit} className="grid grid-cols-[minmax(0,1fr)] gap-10">
-        <section aria-labelledby="who">
-          <h2 id="who" className="font-display text-[1.625rem] font-medium leading-tight">
-            1. Who would you like to see?
-          </h2>
-          <div className="mt-3 grid gap-2 sm:grid-cols-2 min-[1400px]:grid-cols-4">
-            <label className="choice flex-col px-4 py-3">
+      <form onSubmit={submit} className="grid grid-cols-[minmax(0,1fr)] gap-[34px]">
+        <section aria-labelledby="who" data-story="who">
+          <StepHeading n={1} id="who">
+            Who would you like to see?
+          </StepHeading>
+          <div className="mt-4 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+            <label className="choice items-start gap-3 px-4 py-3.5">
               <input type="radio" name="therapist" className="sr-only" checked={therapistId === "any"} onChange={() => chooseTherapist("any")} />
-              <span className="font-semibold">First available</span>
-              <span className="choice-note text-[0.9375rem]">Show every open time, with whoever is free</span>
+              <span className="initials shrink-0 !text-[0.8125rem] uppercase tracking-[0.04em]">Any</span>
+              <span className="grid">
+                <span className="text-[1.0625rem] font-bold leading-tight">First available</span>
+                <span className="choice-note mt-0.5 text-[0.9375rem] leading-snug">Every open time, with whoever is free</span>
+              </span>
             </label>
-            {therapists.map((therapist) => (
-              <label key={therapist.id} className="choice flex-col px-4 py-3">
+            {therapists.map((therapist, index) => (
+              <label key={therapist.id} data-story={`therapist-${index}`} className="choice items-start gap-3 px-4 py-3.5">
                 <input type="radio" name="therapist" className="sr-only" checked={therapistId === therapist.id} onChange={() => chooseTherapist(therapist.id)} />
-                <span className="font-semibold">
-                  {therapist.name}, {therapist.credentials}
+                <span className="initials shrink-0">{initialsOf(therapist.name)}</span>
+                <span className="grid">
+                  <span className="text-[1.0625rem] font-bold leading-tight">
+                    {therapist.name}, {therapist.credentials}
+                  </span>
+                  <span className="choice-note mt-0.5 text-[0.9375rem] leading-snug">{therapist.focus}</span>
+                  <span className="choice-note mt-1 text-[0.8125rem] font-bold uppercase tracking-[0.06em]">{therapist.offersVideo ? "In person or video" : "In person only"}</span>
                 </span>
-                <span className="choice-note text-[0.9375rem] leading-snug">{therapist.focus}</span>
-                <span className="choice-note mt-auto pt-1 text-[0.8125rem]">{therapist.offersVideo ? "In person or video" : "In person only"}</span>
               </label>
             ))}
           </div>
         </section>
 
-        <section aria-labelledby="when">
-          <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
-            <h2 id="when" className="font-display text-[1.625rem] font-medium leading-tight">
-              2. Pick a time
-            </h2>
-            <fieldset className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-              <legend className="float-left mr-3 font-semibold">How would you like to meet?</legend>
-              <div className="grid grid-cols-2 gap-2">
-                <label className="choice min-h-11 items-center justify-center px-4 py-2 font-semibold">
-                  <input type="radio" name="mode" className="sr-only" checked={mode === "office"} onChange={() => setMode("office")} />
-                  In person
-                </label>
-                <label className={`choice min-h-11 items-center justify-center px-4 py-2 font-semibold ${videoUnavailable ? "cursor-not-allowed opacity-50" : ""}`}>
-                  <input type="radio" name="mode" className="sr-only" disabled={videoUnavailable} checked={mode === "video"} onChange={() => { setMode("video"); setPicked(null); }} />
-                  Video
-                </label>
-              </div>
+        <section aria-labelledby="when" data-story="when">
+          <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-3">
+            <StepHeading n={2} id="when">
+              Pick a time
+            </StepHeading>
+            <fieldset className="flex flex-wrap items-center gap-2">
+              <legend className="sr-only">How would you like to meet?</legend>
+              <label className="seg">
+                <input type="radio" name="mode" className="sr-only" checked={mode === "office"} onChange={() => setMode("office")} />
+                In person
+              </label>
+              <label className="seg">
+                <input type="radio" name="mode" className="sr-only" disabled={videoUnavailable} checked={mode === "video"} onChange={() => { setMode("video"); setPicked(null); }} />
+                Video
+              </label>
             </fieldset>
           </div>
-          {videoUnavailable && <p className="mt-2 text-sm text-muted sm:text-right">{chosen!.name} sees clients in person only.</p>}
+          {videoUnavailable && <p className="mt-2 text-[0.9375rem] text-muted sm:text-right">{chosen!.name} sees clients in person only.</p>}
 
           {matching.length === 0 || !week ? (
-            <p className="panel mt-4 px-4 py-4 leading-relaxed">
-              No open times in the next three weeks. <Link href="/waitlist" className="font-semibold text-accent underline">Join the waitlist</Link> and you
+            <p className="mt-4 rounded-[0.5rem] border-[1.5px] border-dashed border-rule px-4 py-4 leading-relaxed">
+              No open times in the next three weeks. <Link href="/waitlist" className="font-bold text-accent underline">Join the waitlist</Link> and you
               will be offered the first cancellation that fits.
             </p>
           ) : (
             <>
-              <div className="mt-4 flex items-center justify-between gap-3 border-b-2 border-ink pb-2">
-                <p className="font-display text-xl font-medium" aria-live="polite">
+              <div className="mt-4 flex items-center justify-between gap-3">
+                <p className="font-display text-xl font-medium text-dusk" aria-live="polite">
                   {week.label}
                 </p>
                 <div className="flex gap-2">
@@ -173,15 +189,19 @@ export function BookingFlow({ therapists, slots, weeks }: Props) {
               </div>
 
               {/* Laptop: the working week side by side, like a page of the appointment book. */}
-              <div className="hidden grid-cols-5 lg:grid" role="group" aria-label="Open times this week">
-                {week.days.map((day, index) => {
+              <div className="mt-3 hidden grid-cols-5 gap-2.5 lg:grid" role="group" aria-label="Open times this week">
+                {week.days.map((day) => {
                   const times = byDay.get(day.dayKey) ?? [];
                   return (
-                    <div key={day.dayKey} className={`min-h-40 px-2 pb-3 pt-2.5 ${index > 0 ? "border-l border-line" : "pl-0"} ${index === 4 ? "pr-0" : ""}`}>
-                      <p className="mb-2.5 leading-tight">
-                        <span className="font-semibold">{day.weekday}</span> <span className="text-muted">{day.date}</span>
+                    <div key={day.dayKey} className="min-w-0">
+                      <p className="mb-2.5 border-b-2 border-ink pb-1.5 leading-tight">
+                        <span className="font-bold">{day.weekday}</span> <span className="text-muted">{day.date}</span>
                       </p>
-                      {times.length === 0 ? <p className="text-sm text-muted">Nothing open</p> : <div className="grid gap-1.5">{times.map(timeButton)}</div>}
+                      {times.length === 0 ? (
+                        <p className="rounded-[0.5rem] border-[1.5px] border-dashed border-rule px-3 py-3 text-[0.9375rem] leading-snug text-muted">{nothing}</p>
+                      ) : (
+                        <div className="grid gap-2">{times.map(timeButton)}</div>
+                      )}
                     </div>
                   );
                 })}
@@ -197,10 +217,10 @@ export function BookingFlow({ therapists, slots, weeks }: Props) {
                       disabled={!byDay.has(day.dayKey)}
                       aria-pressed={day.dayKey === activeDay?.dayKey}
                       onClick={() => setDayKey(day.dayKey)}
-                      className="choice min-h-14 flex-col items-center justify-center px-1 py-1.5 leading-tight disabled:cursor-not-allowed disabled:border-line disabled:bg-transparent disabled:text-muted"
+                      className="choice min-h-14 flex-col items-center justify-center px-1 py-1.5 leading-tight disabled:cursor-not-allowed disabled:border-dashed disabled:border-rule disabled:bg-transparent disabled:text-muted"
                     >
                       <span className="choice-note text-[0.8125rem]">{day.weekday}</span>
-                      <span className="whitespace-nowrap text-[0.9375rem] font-semibold">{day.date}</span>
+                      <span className="whitespace-nowrap text-[0.9375rem] font-bold">{day.date}</span>
                     </button>
                   ))}
                 </div>
@@ -213,9 +233,9 @@ export function BookingFlow({ therapists, slots, weeks }: Props) {
                 )}
               </div>
 
-              <p className="mt-4 border-t border-line pt-3 text-sm text-muted">
+              <p className="mt-4 text-[0.9375rem] text-muted">
                 Sessions are {SESSION_MINUTES} minutes. Times are Mountain Time. Nothing that suits you?{" "}
-                <Link href="/waitlist" className="font-semibold text-accent underline">
+                <Link href="/waitlist" className="font-bold text-accent underline">
                   Join the waitlist
                 </Link>
                 .
@@ -225,25 +245,25 @@ export function BookingFlow({ therapists, slots, weeks }: Props) {
         </section>
 
         {selection && (
-          <section aria-labelledby="you" className="arrive">
-            <h2 id="you" className="font-display text-[1.625rem] font-medium leading-tight">
-              3. Your details
-            </h2>
-            <div className="mt-3 max-w-[40rem]">
+          <section aria-labelledby="you" data-story="details" className="arrive">
+            <StepHeading n={3} id="you">
+              Your details
+            </StepHeading>
+            <div className="mt-4 max-w-[40rem]">
               <PersonFields value={person} onChange={setPerson} />
             </div>
             <div className="mt-6 max-w-[40rem] border-t-2 border-ink pt-4">
               <p className="text-[1.0625rem] leading-relaxed">
-                <strong className="font-semibold">
+                <strong className="font-bold">
                   {selection.weekday}, {selection.date} at {selection.time}
                 </strong>{" "}
                 with {byId.get(selection.therapistId)!.name}, {mode === "video" ? "by video" : "in person"}.
               </p>
-              <button type="submit" disabled={pending} className="btn btn-primary mt-3 w-full sm:w-auto">
+              <button type="submit" data-story="book" disabled={pending} className="btn btn-primary mt-3 w-full sm:w-auto">
                 {pending ? "Booking" : "Book this appointment"}
               </button>
               {error && (
-                <p role="alert" className="mt-2 text-sm text-flag">
+                <p role="alert" className="mt-2 font-bold text-flag">
                   {error}
                 </p>
               )}
@@ -251,6 +271,7 @@ export function BookingFlow({ therapists, slots, weeks }: Props) {
           </section>
         )}
       </form>
+      {children}
     </SiteFrame>
   );
 }

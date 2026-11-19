@@ -50,10 +50,13 @@ export async function bookableSlots(ctx: Ctx): Promise<{ therapists: Therapist[]
 export type Cell =
   | { kind: "off" }
   | { kind: "open"; past: boolean }
-  | { kind: "held"; openingId: string }
+  /** A cancelled time nobody has yet: being offered to the waitlist, or offered and not taken. */
+  | { kind: "gone"; openingId: string; clientName: string; offering: boolean }
   | { kind: "appointment"; appointment: Appointment; clientName: string };
 
-export type WeekView = { hours: number[]; days: { day: Day; cells: (Cell & { startsAt: Date })[] }[]; booked: number; open: number };
+export type WeekCounts = { confirmed: number; unconfirmed: number; open: number; gone: number };
+
+export type WeekView = { hours: number[]; days: { day: Day; cells: (Cell & { startsAt: Date })[] }[]; counts: WeekCounts };
 
 /** One therapist's Monday-to-Friday week as a grid of hours. */
 export async function weekView(ctx: Ctx, therapist: Therapist, monday: Day): Promise<WeekView> {
@@ -72,16 +75,27 @@ export async function weekView(ctx: Ctx, therapist: Therapist, monday: Day): Pro
         inArray(appointments.status, ["booked", "confirmed", "completed"]),
       ),
     );
-  const held = await ctx.db
-    .select()
+  const cancelled = await ctx.db
+    .select({ opening: openings, clientName: clients.name })
     .from(openings)
-    .where(and(eq(openings.sandboxId, ctx.sandboxId), eq(openings.therapistId, therapist.id), eq(openings.status, "offering")));
+    .innerJoin(appointments, eq(appointments.id, openings.cancelledAppointmentId))
+    .innerJoin(clients, eq(clients.id, appointments.clientId))
+    .where(
+      and(
+        eq(openings.sandboxId, ctx.sandboxId),
+        eq(openings.therapistId, therapist.id),
+        gte(openings.startsAt, from),
+        lt(openings.startsAt, to),
+        inArray(openings.status, ["offering", "unfilled"]),
+      ),
+    )
+    .orderBy(asc(openings.openedAt));
   const byTime = new Map(rows.map((row) => [row.appointment.startsAt.getTime(), row]));
-  const heldByTime = new Map(held.map((opening) => [opening.startsAt.getTime(), opening]));
+  // The latest cancellation of a time is the one that says what state it is in.
+  const goneByTime = new Map(cancelled.map((row) => [row.opening.startsAt.getTime(), row]));
 
   const hours = [...new Set(Object.values(therapist.hours).flat())].sort((a, b) => a - b);
-  let booked = 0;
-  let open = 0;
+  const counts: WeekCounts = { confirmed: 0, unconfirmed: 0, open: 0, gone: 0 };
   const days = [1, 2, 3, 4, 5].map((weekday) => {
     const day = addDays(monday, weekday - 1);
     const working = therapist.hours[String(weekday)] ?? [];
@@ -90,18 +104,22 @@ export async function weekView(ctx: Ctx, therapist: Therapist, monday: Day): Pro
       if (!working.includes(hour)) return { kind: "off", startsAt };
       const row = byTime.get(startsAt.getTime());
       if (row) {
-        booked++;
+        if (row.appointment.status === "confirmed") counts.confirmed++;
+        else if (row.appointment.status === "booked") counts.unconfirmed++;
         return { kind: "appointment", startsAt, ...row };
       }
-      const opening = heldByTime.get(startsAt.getTime());
-      if (opening) return { kind: "held", startsAt, openingId: opening.id };
       const past = startsAt <= ctx.now;
-      if (!past) open++;
+      const gone = goneByTime.get(startsAt.getTime());
+      if (gone) {
+        if (!past) counts.gone++;
+        return { kind: "gone", startsAt, openingId: gone.opening.id, clientName: gone.clientName, offering: gone.opening.status === "offering" };
+      }
+      if (!past) counts.open++;
       return { kind: "open", startsAt, past };
     });
     return { day, cells };
   });
-  return { hours, days, booked, open };
+  return { hours, days, counts };
 }
 
 export type AppointmentView = { appointment: Appointment; client: Client; therapist: Therapist };

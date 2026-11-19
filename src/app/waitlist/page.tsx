@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AsideIntro, SiteFrame } from "@/components/site";
+import { StepHeading, SiteFrame } from "@/components/site";
 import { OFFER_WINDOW_MINUTES } from "@/lib/practice";
 import { WaitlistForm } from "@/components/waitlist-form";
 import { listTherapists } from "@/server/queries";
@@ -7,31 +7,38 @@ import { getCtx } from "@/server/session";
 
 export const metadata: Metadata = { title: "Join the waitlist" };
 
+const STEPS = [
+  "Someone cancels a time that fits what you told us.",
+  `We send you a link. The time is held for you for ${OFFER_WINDOW_MINUTES} minutes.`,
+  "Take it and you are booked. Pass, or miss it, and you keep your place.",
+];
+
 export default async function WaitlistPage() {
   const therapists = await listTherapists(await getCtx());
   return (
     <SiteFrame
-      aside={
+      title={
         <>
-          <AsideIntro title="Join the waitlist">
-            Tell us when you could come. When someone cancels a time that fits, it is offered to whoever has waited longest, one person at a time.
-          </AsideIntro>
-          <ol className="mt-8 hidden max-w-[34ch] gap-4 text-[1.0625rem] leading-snug lg:grid">
-            {[
-              "Someone cancels a time that fits what you told us.",
-              `We send you a link. The time is held for you for ${OFFER_WINDOW_MINUTES} minutes.`,
-              "Take it and you are booked. Pass, or miss it, and you keep your place.",
-            ].map((step, index) => (
-              <li key={step} className="grid grid-cols-[1.75rem_minmax(0,1fr)] border-t border-white/15 pt-4">
-                <span className="font-display text-xl italic text-dusk-soft">{index + 1}</span>
+          First in line when a time <em>opens up.</em>
+        </>
+      }
+      lede="Tell us when you could come. When someone cancels a time that fits, it is offered to whoever has waited longest, one person at a time."
+      card={
+        <div className="ticket px-4 pb-4 pt-3.5 sm:px-[26px] sm:pb-[26px] sm:pt-[22px]">
+          <p className="pb-2.5 font-display text-xl font-medium italic sm:text-[1.3rem]">How the waitlist works</p>
+          <ol>
+            {STEPS.map((step, index) => (
+              <li key={step} className="grid grid-cols-[2.25rem_minmax(0,1fr)] items-baseline border-t border-dashed border-rule py-2.5 leading-snug">
+                <span className="font-display text-[1.55rem] font-medium text-accent">{index + 1}</span>
                 {step}
               </li>
             ))}
           </ol>
-        </>
+        </div>
       }
     >
-      <div className="max-w-[40rem]">
+      <StepHeading n={1}>When could you come?</StepHeading>
+      <div className="mt-5 max-w-[40rem]">
         <WaitlistForm therapists={therapists.map(({ id, name, credentials, focus, offersVideo }) => ({ id, name, credentials, focus, offersVideo }))} />
       </div>
     </SiteFrame>

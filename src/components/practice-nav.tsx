@@ -8,35 +8,43 @@ const ITEMS = [
   { href: "/practice/waitlist", label: "Waitlist" },
   { href: "/practice/cancellations", label: "Cancellations" },
   { href: "/practice/outbox", label: "Outbox" },
-];
+] as const;
+
+type Counts = { waiting: number; offering: number; messages: number };
 
 /** A list down the front desk's panel on wide screens, a bar along the bottom on phones. */
-export function PracticeNav({ outboxCount, offering }: { outboxCount: number; offering: number }) {
+export function PracticeNav({ waiting, offering, messages }: Counts) {
   const pathname = usePathname();
   const isActive = (href: string) => (href === "/practice" ? pathname === "/practice" || pathname.startsWith("/practice/appointments") : pathname.startsWith(href));
+  const badges: Record<string, { count: number; what: string; urgent?: boolean }> = {
+    "/practice/waitlist": { count: waiting, what: "waiting" },
+    "/practice/cancellations": { count: offering, what: "being offered now", urgent: true },
+    "/practice/outbox": { count: messages, what: "messages" },
+  };
 
   return (
-    <nav aria-label="Practice workspace" className="fixed inset-x-0 bottom-0 z-10 flex border-t border-white/20 bg-dusk lg:static lg:mt-10 lg:flex-col lg:border-t-0">
+    <nav aria-label="Practice workspace" className="fixed inset-x-0 bottom-0 z-10 flex gap-1 border-t border-white/20 bg-dusk p-1.5 lg:static lg:mt-8 lg:flex-col lg:border-t-0 lg:p-0 lg:px-3">
       {ITEMS.map((item) => {
         const active = isActive(item.href);
-        const badge = item.href === "/practice/outbox" ? outboxCount : item.href === "/practice/cancellations" ? offering : 0;
+        const badge = badges[item.href];
         return (
           <Link
             key={item.href}
             href={item.href}
             aria-current={active ? "page" : undefined}
-            className={`flex min-h-12 flex-1 items-center justify-center gap-2 px-1 text-[0.875rem] font-semibold lg:min-h-11 lg:flex-none lg:justify-between lg:border-l-[3px] lg:px-4 lg:text-[1.0625rem] ${
-              active
-                ? "text-white shadow-[inset_0_3px_0_#b7c1ee] lg:border-[#b7c1ee] lg:bg-white/10 lg:shadow-none"
-                : "text-dusk-soft hover:text-white lg:border-transparent"
+            className={`flex min-h-11 flex-1 items-center justify-center gap-2 rounded-[0.375rem] px-1 text-[0.875rem] font-bold lg:flex-none lg:justify-between lg:px-3 lg:text-[1.0625rem] ${
+              active ? "bg-white text-dusk" : "text-dusk-soft hover:bg-white/10 hover:text-white"
             }`}
           >
             {item.label}
-            {badge > 0 && (
+            {badge && badge.count > 0 && (
               <span
-                className={`hidden rounded-[0.25rem] px-2 text-[0.875rem] tabular-nums lg:inline ${item.href === "/practice/cancellations" ? "bg-amber-tint text-amber" : "bg-white/15 text-white"}`}
+                className={`hidden min-w-7 rounded-full px-2 text-center text-[0.875rem] leading-6 tabular-nums lg:inline ${
+                  badge.urgent ? "bg-amber-tint text-amber" : active ? "bg-dusk text-white" : "bg-dusk-mid text-white"
+                }`}
               >
-                {badge}
+                {badge.count}
+                <span className="sr-only"> {badge.what}</span>
               </span>
             )}
           </Link>

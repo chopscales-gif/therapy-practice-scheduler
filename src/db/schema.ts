@@ -14,6 +14,10 @@ export const sandboxes = pgTable("sandboxes", {
   /** The demo clock: what time it is inside this sandbox. It only moves when the visitor skips ahead. */
   clockAt: timestamp("clock_at", { withTimezone: true }).notNull(),
   clockStartAt: timestamp("clock_start_at", { withTimezone: true }).notNull(),
+  /** The practice name a visitor typed in. Null shows the fictional practice. */
+  practiceName: text("practice_name"),
+  /** Goes up by one each time the visitor changes something, so a second device knows to redraw. */
+  revision: integer("revision").notNull().default(0),
 });
 
 const sandboxId = () =>
@@ -228,6 +232,24 @@ export const outboxMessages = pgTable(
     link: text("link"),
   },
   (t) => [index("outbox_sandbox").on(t.sandboxId, t.createdAt)],
+);
+
+/**
+ * A short-lived link that lets a second device (the visitor's phone) carry on
+ * in the same sandbox. The link carries only the token, never the sandbox id.
+ */
+export const handoffs = pgTable(
+  "handoffs",
+  {
+    /** Unguessable value in the join link. */
+    token: text("token").primaryKey(),
+    sandboxId: sandboxId(),
+    /** The page the second device lands on. Always a path inside this app. */
+    path: text("path").notNull(),
+    /** Real time, not the demo clock: a link expires however far the visitor skips ahead. */
+    createdAt: at("created_at").notNull(),
+  },
+  (t) => [index("handoffs_sandbox").on(t.sandboxId)],
 );
 
 export type Therapist = typeof therapists.$inferSelect;

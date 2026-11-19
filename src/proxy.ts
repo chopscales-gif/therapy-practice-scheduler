@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { COOKIE_CHECK, SANDBOX_COOKIE } from "@/server/cookie";
+import { COOKIE_CHECK, SANDBOX_COOKIE, SANDBOX_COOKIE_OPTIONS } from "@/server/cookie";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
@@ -30,16 +30,11 @@ export function proxy(request: NextRequest) {
   const back = request.nextUrl.clone();
   back.searchParams.set(COOKIE_CHECK, "1");
   const response = NextResponse.redirect(back, 307);
-  response.cookies.set(SANDBOX_COOKIE, crypto.randomUUID(), {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 60 * 60 * 48, // sandboxes are purged after 48 hours
-  });
+  response.cookies.set(SANDBOX_COOKIE, crypto.randomUUID(), SANDBOX_COOKIE_OPTIONS);
   return response;
 }
 
+// A hand-off link (/join/...) sets the cookie itself, so it must not be given a new sandbox first.
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|robots.txt).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|robots.txt|join/).*)"],
 };

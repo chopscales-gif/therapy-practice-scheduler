@@ -8,15 +8,16 @@ import { ActionButton } from "./action-button";
 export function ScenarioPanel({ scenario }: { scenario: Scenario }) {
   const first = scenario.clientName.split(" ")[0];
   return (
-    <aside className="mb-8 rounded-[0.25rem] border border-dashed border-amber bg-amber-tint/60 px-4 py-4 sm:px-5">
-      <p className="text-sm font-semibold text-amber">In this demo</p>
+    <aside className="rounded-[0.5rem] border-[1.5px] border-dashed border-amber bg-amber-tint/70 px-4 py-3.5 sm:px-5">
+      <p className="eyebrow !text-amber">In this demo</p>
       {scenario.state === "ready" && (
         <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
           <p className="max-w-[66ch] leading-relaxed text-ink">
-            {scenario.clientName} is booked with {scenario.therapistName} on {fmtDateTime(scenario.startsAt)}. Have {first} cancel, and watch the
-            waitlist fill the time without anyone at the front desk lifting a finger.
+            <strong className="font-bold">{scenario.clientName}</strong> is booked with {scenario.therapistName} on{" "}
+            <strong className="font-bold">{fmtDateTime(scenario.startsAt)}</strong>. Have {first} cancel, and watch the waitlist fill the time without anyone
+            at the front desk lifting a finger.
           </p>
-          <ActionButton action={cancelScenarioAction} pendingLabel="Cancelling" className="shrink-0">
+          <ActionButton story="cancel-scenario" action={cancelScenarioAction} pendingLabel="Cancelling" className="shrink-0">
             {first} cancels
           </ActionButton>
         </div>
@@ -24,16 +25,16 @@ export function ScenarioPanel({ scenario }: { scenario: Scenario }) {
       {scenario.state === "run" && (
         <p className="mt-1 leading-relaxed text-ink">
           {first} cancelled the {fmtTime(scenario.startsAt)}.{" "}
-          <Link href={`/practice/cancellations${scenario.openingId ? `#${scenario.openingId}` : ""}`} className="font-semibold underline">
+          <Link href={`/practice/cancellations${scenario.openingId ? `#${scenario.openingId}` : ""}`} className="font-bold underline">
             See who was offered it
           </Link>
-          , or use Reset demo in the top bar to run it again.
+          , or use Reset in the bar at the top to run it again.
         </p>
       )}
       {scenario.state === "missed" && (
         <p className="mt-1 leading-relaxed text-ink">
           The demo clock has moved past the point where {first}&apos;s appointment could be offered to the waitlist. Open any upcoming appointment and
-          cancel it to see the same thing, or use Reset demo in the top bar to start again.
+          cancel it to see the same thing, or use Reset in the bar at the top to start again.
         </p>
       )}
     </aside>

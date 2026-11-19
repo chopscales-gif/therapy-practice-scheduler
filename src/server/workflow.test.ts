@@ -4,6 +4,7 @@ import { createEmbeddedDb, type Db } from "@/db/client";
 import { ensureSandbox, resetSandbox } from "@/db/sandbox";
 import { appointments, clients, offers, openingEvents, openings, outboxMessages, reminders, therapists, waitlistEntries, type Therapist } from "@/db/schema";
 import { addDays, dayOf, fmtDateTime, zonedTime } from "@/lib/time";
+import { FOOL_KINDS, foolRequest } from "./fool";
 import { WorkflowError, book, cancel, cancelByToken, confirm, joinWaitlist, previewCancellation, respondToOffer, runClockTo, skipAhead, type BookingRequest, type Ctx } from "./workflow";
 
 /** End-to-end tests of the scheduling workflow against a real (in-memory) Postgres. */
@@ -441,4 +442,22 @@ describe("housekeeping", () => {
     expect((await own.select({ id: table.id }).from(table)).map((row) => row.id).sort()).toEqual(["new", "recent"]);
     expect(await own.select().from(appointments).where(eq(appointments.sandboxId, "old"))).toHaveLength(0);
   }, 60_000);
+});
+
+describe("try to fool it", () => {
+  const REFUSALS = {
+    taken: "Someone else just took that time. Pick another.",
+    past: "That time is too soon to book online. Pick a later one, or call the practice.",
+    video: "Andre Whitaker sees clients in person only.",
+  };
+
+  it.each(FOOL_KINDS)("refuses the %s attempt in the workflow's own words and changes nothing", async (kind) => {
+    const { ctx } = await fresh();
+    const count = async () => (await ctx.db.select().from(appointments).where(eq(appointments.sandboxId, ctx.sandboxId))).length;
+    const before = { appointments: await count(), outbox: (await outbox(ctx)).length };
+    const attempt = await foolRequest(ctx, kind);
+    expect(attempt).not.toBeNull();
+    await expect(book(ctx, attempt!)).rejects.toThrow(REFUSALS[kind]);
+    expect({ appointments: await count(), outbox: (await outbox(ctx)).length }).toEqual(before);
+  });
 });

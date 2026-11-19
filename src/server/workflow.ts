@@ -31,6 +31,7 @@ import {
   type Mode,
   type ModePreference,
   type PartOfDay,
+  type Practice,
 } from "@/lib/practice";
 import { earliestBookable, horizonEnd, isSessionStart } from "@/lib/slots";
 import { story } from "@/lib/story";
@@ -44,8 +45,11 @@ import { modeForOffer, rankCandidates, type Candidate, type Verdict } from "@/li
  * code runs under the tests and under the app.
  */
 
-/** `now` is the sandbox's demo clock, not the wall clock. */
-export type Ctx = { db: Db; sandboxId: string; now: Date };
+/**
+ * `now` is the sandbox's demo clock, not the wall clock. `practice` is whose
+ * name goes on new messages; left out, it is the fictional practice.
+ */
+export type Ctx = { db: Db; sandboxId: string; now: Date; practice?: Practice };
 
 /** A refusal with a reason the screen can show as it is. */
 export class WorkflowError extends Error {}
@@ -173,7 +177,7 @@ export function book(outer: Ctx, request: BookingRequest): Promise<Appointment> 
       .select({ total: count() })
       .from(appointments)
       .where(and(eq(appointments.sandboxId, ctx.sandboxId), eq(appointments.source, "online")));
-    if (total >= MAX_ONLINE_BOOKINGS) throw new WorkflowError("This demo sandbox is full. Use Reset demo in the bar at the top to start again.");
+    if (total >= MAX_ONLINE_BOOKINGS) throw new WorkflowError("This demo sandbox is full. Use Reset in the bar at the top to start again.");
 
     const client = await findOrCreateClient(ctx, request);
     if (await isBusy(ctx, client.id, request.startsAt)) throw new WorkflowError("You already have an appointment at that time.");
@@ -186,7 +190,7 @@ export function book(outer: Ctx, request: BookingRequest): Promise<Appointment> 
     });
     if (!appointment) throw new WorkflowError("Someone else just took that time. Pick another.");
     await scheduleReminders(ctx, appointment);
-    await queue(ctx, client, bookedMessage(client, appointment.startsAt, appointment.mode, appointment.token));
+    await queue(ctx, client, bookedMessage(client, appointment.startsAt, appointment.mode, appointment.token, ctx.practice));
     return appointment;
   });
 }
@@ -234,7 +238,7 @@ export function cancel(ctx: Ctx, appointmentId: string, who: "client" | "practic
       .set({ status: "cancelled" })
       .where(and(eq(reminders.appointmentId, appointment.id), eq(reminders.status, "scheduled")));
     const client = await findClient(tx, appointment.clientId);
-    await queue(tx, client, cancelledMessage(client, appointment.startsAt));
+    await queue(tx, client, cancelledMessage(client, appointment.startsAt, tx.practice));
 
     const [opening] = await tx.db
       .insert(openings)
@@ -352,7 +356,7 @@ async function offerToNext(ctx: Ctx, openingId: string): Promise<void> {
     })
     .returning();
   const client = await findClient(ctx, next.clientId);
-  const message = offerMessage(client, opening.startsAt, offer.expiresAt, offer.token);
+  const message = offerMessage(client, opening.startsAt, offer.expiresAt, offer.token, ctx.practice);
   await queue(ctx, client, message);
   await record(ctx, opening.id, story.offered(client.name, message.channel, offer.expiresAt));
 }
@@ -402,7 +406,7 @@ export function respondToOffer(ctx: Ctx, offerToken: string, answer: "accept" | 
     await tx.db.update(openings).set({ status: "filled", filledAppointmentId: appointment.id, closedAt: tx.now }).where(eq(openings.id, opening.id));
     await tx.db.update(waitlistEntries).set({ status: "placed" }).where(eq(waitlistEntries.id, entry.id));
     await scheduleReminders(tx, appointment);
-    await queue(tx, client, offerAcceptedMessage(client, appointment.startsAt, appointment.token));
+    await queue(tx, client, offerAcceptedMessage(client, appointment.startsAt, appointment.token, tx.practice));
     await record(tx, opening.id, story.accepted(client.name, offer.sentAt, tx.now), "good");
   });
 }
@@ -422,7 +426,7 @@ export function joinWaitlist(outer: Ctx, request: WaitlistRequest): Promise<void
       if (request.mode === "video" && !therapist.offersVideo) throw new WorkflowError(`${therapist.name} sees clients in person only.`);
     }
     const [{ total }] = await ctx.db.select({ total: count() }).from(waitlistEntries).where(eq(waitlistEntries.sandboxId, ctx.sandboxId));
-    if (total >= MAX_WAITLIST) throw new WorkflowError("This demo sandbox is full. Use Reset demo in the bar at the top to start again.");
+    if (total >= MAX_WAITLIST) throw new WorkflowError("This demo sandbox is full. Use Reset in the bar at the top to start again.");
 
     const client = await findOrCreateClient(ctx, request);
     const [already] = await ctx.db
@@ -440,7 +444,7 @@ export function joinWaitlist(outer: Ctx, request: WaitlistRequest): Promise<void
       mode: request.mode,
       joinedAt: ctx.now,
     });
-    await queue(ctx, client, waitlistJoinedMessage(client));
+    await queue(ctx, client, waitlistJoinedMessage(client, ctx.practice));
   });
 }
 
@@ -479,7 +483,7 @@ export async function runClockTo(ctx: Ctx, target: Date): Promise<void> {
       .orderBy(asc(reminders.dueAt));
     for (const { reminder, appointment, client } of due) {
       await tx.db.update(reminders).set({ status: "sent", sentAt: reminder.dueAt }).where(and(eq(reminders.id, reminder.id), eq(reminders.status, "scheduled")));
-      await queue(tx, client, reminderMessage(client, appointment.startsAt, reminder.hoursBefore, appointment.token), reminder.dueAt);
+      await queue(tx, client, reminderMessage(client, appointment.startsAt, reminder.hoursBefore, appointment.token, tx.practice), reminder.dueAt);
     }
 
     await tx.db
@@ -503,7 +507,7 @@ export async function skipAhead(ctx: Ctx, step: ClockStep): Promise<Date> {
   const target = step === "20min" ? new Date(ctx.now.getTime() + 20 * 60_000) : zonedTime(addDays(dayOf(ctx.now), 1), 8);
   const [sandbox] = await ctx.db.select().from(sandboxes).where(eq(sandboxes.id, ctx.sandboxId));
   const limit = new Date(sandbox.clockStartAt.getTime() + CLOCK_LIMIT_DAYS * 86_400_000);
-  if (target > limit) throw new WorkflowError(`The demo clock stops ${CLOCK_LIMIT_DAYS} days in. Use Reset demo to start again.`);
+  if (target > limit) throw new WorkflowError(`The demo clock stops ${CLOCK_LIMIT_DAYS} days in. Use Reset in the bar at the top to start again.`);
   await runClockTo(ctx, target);
   return target;
 }
