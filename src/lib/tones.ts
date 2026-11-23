@@ -2,18 +2,18 @@ import type { CSSProperties } from "react";
 
 /**
  * One colour per meaning on the practice side, the same values as the theme in
- * globals.css: blue is settled, amber is waiting on someone, mulberry is the
+ * globals.css: green is settled, amber is waiting on someone, rosewood is the
  * waitlist, red is a cancelled hour, grey is open or over.
  */
 export const TONE = {
-  good: "#27577f",
-  wait: "#b97d0c",
+  good: "#2e6e58",
+  wait: "#c98a12",
   /** Amber dark enough to carry white text, for pills. */
-  waiting: "#7a4f06",
-  waitlist: "#7a2e5e",
-  gone: "#a6321f",
-  open: "#9a8c98",
-  done: "#65586a",
+  waiting: "#8a5a08",
+  waitlist: "#a24a5c",
+  gone: "#b23a2c",
+  open: "#a2959b",
+  done: "#6f6068",
 } as const;
 
 export type Tone = keyof typeof TONE;

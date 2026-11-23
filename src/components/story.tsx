@@ -376,14 +376,14 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
 
   const story = useMemo<Story>(() => ({ busy: phase.kind === "starting" || running, error, start: () => void start() }), [phase.kind, running, error, start]);
 
-  const outline = "inline-flex min-h-11 cursor-pointer items-center rounded-[0.375rem] border-[1.5px] border-white px-4 font-bold hover:bg-white/15";
+  const outline = "inline-flex min-h-11 cursor-pointer items-center rounded-xl border-[1.5px] border-white px-4 font-bold hover:bg-white/15";
 
   return (
     <StoryContext.Provider value={story}>
       {children}
       {running && <Spotlight />}
       {(running || closing) && (
-        <section aria-label="The story" className="on-dusk rise-in fixed inset-x-2 bottom-2 z-50 mx-auto max-w-[46rem] rounded-lg bg-dusk px-4 py-3.5 text-white shadow-[0_12px_40px_-8px_rgba(43,34,48,0.7)] sm:bottom-5 sm:px-5 sm:py-4">
+        <section aria-label="The story" className="on-dusk rise-in fixed inset-x-2 bottom-2 z-50 mx-auto max-w-[46rem] rounded-[1.25rem] bg-dusk px-4 py-3.5 text-white shadow-[0_12px_40px_-8px_rgba(61,36,49,0.6)] sm:bottom-5 sm:px-5 sm:py-4">
           {phase.kind === "running" && (
             <div className="flex items-center gap-4">
               <div aria-live="polite" className="min-w-0 flex-1">
@@ -402,7 +402,7 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
               <p className="text-[0.9375rem] text-white/75">Demonstration build. The story, finished</p>
               <p className="mt-0.5 text-[1.0625rem] font-bold leading-snug sm:text-lg">{STORY_CAPTIONS[STORY_CAPTIONS.length - 1]}</p>
               <div className="mt-3 flex flex-wrap gap-2">
-                <Link ref={closingControl} href="/about" className="inline-flex min-h-11 items-center rounded-[0.375rem] bg-white px-4 font-bold text-dusk hover:bg-white/85">
+                <Link ref={closingControl} href="/about" className="inline-flex min-h-11 items-center rounded-xl bg-white px-4 font-bold text-dusk hover:bg-white/85">
                   What you just saw
                 </Link>
                 <button type="button" onClick={stop} className={outline}>
@@ -472,7 +472,7 @@ function Spotlight() {
       <div ref={arrow} className="story-pointer">
         <span />
         <svg viewBox="0 0 24 24" width="30" height="30">
-          <path d="M5 2.5v17.2l4.6-4.3 3 6.6 2.9-1.3-3-6.5h6.3z" fill="#2b2230" stroke="#fff" strokeWidth="1.6" strokeLinejoin="round" />
+          <path d="M5 2.5v17.2l4.6-4.3 3 6.6 2.9-1.3-3-6.5h6.3z" fill="#3d2431" stroke="#fff" strokeWidth="1.6" strokeLinejoin="round" />
         </svg>
       </div>
     </div>

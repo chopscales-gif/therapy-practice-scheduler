@@ -1,44 +1,51 @@
 @import "tailwindcss";
 
 /*
- * Larkspur Counseling. Dusk and mulberry for the practice itself, bone for its
- * paper. On the practice side every colour means one thing: blue is settled,
- * amber is waiting on someone, mulberry is the waitlist, red is a cancelled
- * hour, grey is open. Amber with a dashed edge is also how the demo's own
- * notes are kept apart from the practice's screens.
+ * Larkspur Counseling. Warm white paper, rosewood for the practice's own voice,
+ * aubergine for its deepest surfaces, and a handful of pastels. On the practice
+ * side every colour means one thing: green is settled, amber is waiting on
+ * someone, rosewood is the waitlist, red is a cancelled hour, grey is open.
+ * Amber with a dashed edge is also how the demo's own notes are kept apart
+ * from the practice's screens.
  */
 @theme inline {
-  --color-ink: #2b2230;
-  --color-ink-soft: #43374a;
-  --color-dusk: #35202f;
-  --color-dusk-mid: #5a3550;
-  --color-dusk-soft: #cdbbc8;
-  --color-accent: #7a2e5e;
-  --color-accent-deep: #5c1f46;
-  --color-accent-tint: #f1e1ea;
-  --color-paper: #f4efe9;
-  --color-surface: #fffdfb;
-  --color-desk: #e4dce3;
-  --color-edge: #cbbfc9;
-  --color-line: #d9cfd2;
-  --color-rule: #c3b5bb;
-  --color-muted: #65586a;
-  --color-lark: #4f5fb8;
-  --color-lark-tint: #e3e6f7;
-  --color-lark-pale: #b7c1ee;
-  --color-good: #27577f;
-  --color-good-tint: #dbe8f2;
-  --color-wait: #b97d0c;
-  --color-amber: #7a4f06;
-  --color-amber-tint: #f6e7c6;
-  --color-flag: #a6321f;
-  --color-flag-tint: #f8e4df;
-  --color-open: #9a8c98;
-  --font-display: var(--font-alegreya), Georgia, serif;
-  --font-sans: var(--font-alegreya-sans), ui-sans-serif, system-ui, sans-serif;
+  --color-ink: #2e2228;
+  --color-ink-soft: #4a3a42;
+  --color-dusk: #3d2431;
+  --color-dusk-mid: #6a4558;
+  --color-dusk-soft: #e2d0d8;
+  --color-accent: #a24a5c;
+  --color-accent-deep: #853a4b;
+  --color-accent-tint: #fae6e6;
+  --color-paper: #fdf8f4;
+  --color-surface: #ffffff;
+  --color-desk: #f8f1ec;
+  --color-edge: #ecdfd8;
+  --color-line: #efe4de;
+  --color-rule: #d9c9c4;
+  --color-muted: #6f6068;
+  --color-lark: #3d62a6;
+  --color-lark-tint: #e3ecf8;
+  --color-lark-pale: #b9cdee;
+  --color-good: #2e6e58;
+  --color-good-tint: #dff0e7;
+  --color-wait: #c98a12;
+  --color-amber: #8a5a08;
+  --color-amber-tint: #fbeccb;
+  --color-flag: #b23a2c;
+  --color-flag-tint: #fbe4df;
+  --color-open: #a2959b;
+  --color-peach: #fdebdc;
+  --color-blush: #f9dfdc;
+  --color-butter: #f8edcd;
+  --color-sage: #dfeee4;
+  --color-sky: #e0eaf6;
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+  --shadow-rest: 0 1px 2px rgba(61, 36, 49, 0.05), 0 6px 16px -10px rgba(61, 36, 49, 0.18);
+  --shadow-lift: 0 1px 2px rgba(61, 36, 49, 0.05), 0 18px 40px -22px rgba(61, 36, 49, 0.32);
 }
 
-/* Alegreya Sans runs small for its size, so the whole interface is set a step larger. */
 html {
   font-size: 106.25%;
 }
@@ -70,14 +77,14 @@ body {
     justify-content: center;
     gap: 0.5rem;
     min-height: 2.875rem;
-    padding: 0.5rem 1.375rem;
-    border-radius: 0.375rem;
+    padding: 0.5rem 1.5rem;
+    border-radius: 999px;
     border: 1.5px solid transparent;
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.2;
     cursor: pointer;
-    transition: background-color 120ms, border-color 120ms;
+    transition: background-color 120ms, border-color 120ms, box-shadow 120ms;
   }
   .btn:disabled {
     cursor: not-allowed;
@@ -86,21 +93,22 @@ body {
   .btn-primary {
     background: var(--color-accent);
     color: #ffffff;
+    box-shadow: 0 8px 18px -10px rgba(162, 74, 92, 0.7);
   }
   .btn-primary:hover:not(:disabled) {
     background: var(--color-accent-deep);
   }
   .btn-quiet {
     background: var(--color-surface);
-    border-color: var(--color-ink);
+    border-color: var(--color-rule);
     color: var(--color-ink);
   }
   .btn-quiet:hover:not(:disabled) {
-    background: var(--color-paper);
+    border-color: var(--color-ink);
   }
   .btn-danger {
     background: var(--color-surface);
-    border-color: var(--color-flag);
+    border-color: #e9b5ac;
     color: var(--color-flag);
   }
   .btn-danger:hover:not(:disabled) {
@@ -109,57 +117,66 @@ body {
 
   .field {
     width: 100%;
-    min-height: 2.875rem;
-    padding: 0.5rem 0.75rem;
+    min-height: 3rem;
+    padding: 0.5rem 0.9375rem;
     border: 1.5px solid var(--color-rule);
-    border-radius: 0.375rem;
+    border-radius: 0.875rem;
     background: var(--color-surface);
     font-size: 1rem;
   }
   .field::placeholder {
-    color: #8b7f8e;
+    color: #9a8b92;
   }
 
   /* A sheet lifted off the desk: the calendar, a list, a record. */
   .panel {
     background: var(--color-surface);
     border: 1px solid var(--color-edge);
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 2px rgba(53, 32, 47, 0.06), 0 10px 22px -16px rgba(53, 32, 47, 0.45);
+    border-radius: 1.25rem;
+    box-shadow: var(--shadow-rest);
   }
 
-  /* The small capital label above a value. */
+  /* The small label above a value or a section. */
   .eyebrow {
-    font-size: 0.8125rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-size: 0.875rem;
+    font-weight: 600;
     color: var(--color-muted);
   }
 
-  /* A solid status pill. The colour is the meaning; set it with --c. */
+  /* Large headings: the soft serif, set light and tight. */
+  .display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.06;
+  }
+
+  /* A status chip. The colour is the meaning; set it with --c. */
   .pill {
     display: inline-flex;
     align-items: center;
     white-space: nowrap;
-    border-radius: 999px;
-    padding: 0.1875rem 0.75rem;
+    border-radius: 0.5rem;
+    padding: 0.1875rem 0.625rem;
     font-size: 0.875rem;
     font-weight: 700;
     line-height: 1.3;
-    background: var(--c);
-    color: #ffffff;
+    background: color-mix(in srgb, var(--c) 15%, #ffffff);
+    color: color-mix(in srgb, var(--c) 72%, #1d1014);
   }
 
-  /* A count on the practice side, with its meaning's colour along the top. */
+  /* A count on the practice side, washed in its meaning's colour. */
   .tile {
     display: block;
-    background: var(--color-surface);
-    border: 1px solid var(--color-edge);
-    border-top: 6px solid var(--c);
-    border-radius: 0.5rem;
-    padding: 0.75rem 1rem 0.875rem;
-    box-shadow: 0 1px 2px rgba(53, 32, 47, 0.06), 0 10px 22px -16px rgba(53, 32, 47, 0.45);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--c) 13%, #ffffff), #ffffff 72%);
+    border: 1px solid color-mix(in srgb, var(--c) 22%, #ffffff);
+    border-radius: 1.125rem;
+    padding: 0.875rem 1.125rem 1rem;
+    box-shadow: var(--shadow-rest);
+    transition: box-shadow 120ms;
+  }
+  a.tile:hover {
+    box-shadow: var(--shadow-lift);
   }
 
   /* A choice the visitor picks by tapping: therapist, day, time, preference. */
@@ -167,9 +184,9 @@ body {
     display: flex;
     cursor: pointer;
     border: 1.5px solid var(--color-line);
-    border-radius: 0.5rem;
-    background: var(--color-paper);
-    transition: border-color 120ms, background-color 120ms, color 120ms;
+    border-radius: 1rem;
+    background: var(--color-surface);
+    transition: border-color 120ms, background-color 120ms, color 120ms, box-shadow 120ms;
   }
   .choice:hover {
     border-color: var(--color-accent);
@@ -177,12 +194,13 @@ body {
   .choice:has(input:checked),
   .choice[aria-pressed="true"] {
     border-color: var(--color-accent);
-    background: var(--color-accent);
-    color: #ffffff;
+    background: var(--color-accent-tint);
+    box-shadow: 0 0 0 1.5px var(--color-accent) inset;
+    color: var(--color-ink);
   }
   .choice:has(input:checked) .choice-note,
   .choice[aria-pressed="true"] .choice-note {
-    color: #f1e1ea;
+    color: var(--color-accent-deep);
   }
   .choice-note {
     color: var(--color-muted);
@@ -196,17 +214,17 @@ body {
   .initials {
     display: grid;
     place-items: center;
-    width: 2.6rem;
-    height: 2.6rem;
+    width: 2.75rem;
+    height: 2.75rem;
     border-radius: 50%;
-    background: var(--color-lark-tint);
-    color: var(--color-lark);
+    background: var(--color-peach);
+    color: var(--color-accent-deep);
     font-family: var(--font-display);
     font-size: 1.125rem;
-    font-weight: 700;
+    font-weight: 500;
   }
   .choice:has(input:checked) .initials {
-    background: rgba(255, 255, 255, 0.18);
+    background: var(--color-accent);
     color: #ffffff;
   }
 
@@ -217,18 +235,20 @@ body {
     cursor: pointer;
     align-items: center;
     justify-content: center;
-    border: 1.5px solid var(--color-ink);
+    border: 1.5px solid var(--color-rule);
     border-radius: 999px;
+    background: var(--color-surface);
     padding: 0.25rem 1.125rem;
-    font-weight: 700;
+    font-weight: 600;
     white-space: nowrap;
   }
   .seg:hover {
-    background: var(--color-paper);
+    border-color: var(--color-ink);
   }
   .seg:has(input:checked),
   .seg[aria-current="page"] {
-    background: var(--color-ink);
+    border-color: var(--color-dusk);
+    background: var(--color-dusk);
     color: #ffffff;
   }
   .seg:has(input:focus-visible) {
@@ -245,11 +265,11 @@ body {
     display: inline-grid;
     place-items: center;
     flex: none;
-    width: 2rem;
-    height: 2rem;
+    width: 2.125rem;
+    height: 2.125rem;
     border-radius: 50%;
-    background: var(--color-dusk);
-    color: #ffffff;
+    background: var(--color-accent-tint);
+    color: var(--color-accent-deep);
     font-family: var(--font-sans);
     font-size: 1rem;
     font-weight: 700;
@@ -257,28 +277,33 @@ body {
 
   /* Hours a therapist does not work, on the week grid. */
   .off-hours {
-    background: repeating-linear-gradient(135deg, transparent 0 6px, rgba(53, 32, 47, 0.07) 6px 7px);
+    background: repeating-linear-gradient(135deg, transparent 0 6px, rgba(61, 36, 49, 0.055) 6px 7px);
   }
 
   /* The appointment card: the small printed card a front desk hands over. */
   .ticket {
     background: var(--color-surface);
     border: 1px solid var(--color-line);
-    border-radius: 0.375rem 0.375rem 0 0;
-    box-shadow: 0 -2px 0 var(--color-accent) inset, 0 20px 40px -22px rgba(53, 32, 47, 0.55);
+    border-radius: 1.5rem;
+    box-shadow: var(--shadow-lift);
   }
 
   /* An appointment on the calendar. --c is its state's colour. */
   .appt {
     display: block;
     height: 100%;
-    border-left: 5px solid var(--c);
-    border-radius: 0.3125rem;
+    border: 1px solid color-mix(in srgb, var(--c) 28%, #ffffff);
+    border-radius: 0.5rem;
     padding: 0.3125rem 0.5rem;
     line-height: 1.2;
   }
   .appt:hover {
     outline: 1.5px solid var(--color-ink);
+  }
+
+  /* The first screen of a client page: a photograph under a warm wash, so dark type reads. */
+  .hero-wash {
+    background: linear-gradient(100deg, rgba(253, 248, 244, 0.95) 0%, rgba(253, 246, 240, 0.84) 40%, rgba(253, 242, 236, 0.38) 100%);
   }
 }
 
@@ -331,7 +356,7 @@ body {
   width: 0;
   height: 0;
   border-radius: 0.625rem;
-  box-shadow: 0 0 0 200vmax rgba(31, 17, 28, 0.64), 0 0 0 2px rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 200vmax rgba(46, 26, 36, 0.6), 0 0 0 2px rgba(255, 255, 255, 0.9);
 }
 
 /* The story's own pointer. Its tip is the top left corner, and the ring is the press. */
@@ -356,7 +381,7 @@ body {
   height: 2.5rem;
   border-radius: 50%;
   border: 3px solid var(--color-lark-pale);
-  background: rgba(183, 193, 238, 0.4);
+  background: rgba(185, 205, 238, 0.4);
   opacity: 0;
 }
 .story-tap span {
@@ -393,7 +418,7 @@ body {
 
 dialog.demo-dialog {
   border: 1.5px dashed var(--color-amber);
-  border-radius: 0.5rem;
+  border-radius: 1.25rem;
   background: var(--color-surface);
 }
 dialog.demo-dialog::backdrop {

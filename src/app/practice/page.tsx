@@ -44,7 +44,7 @@ export default async function CalendarPage({ searchParams }: PageProps<"/practic
     <>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-[2.25rem] font-medium leading-[1.05] tracking-[-0.01em] text-dusk lg:text-[2.6rem]">
+          <h1 className="display text-[2.25rem] text-dusk lg:text-[2.75rem]">
             {current ? "This week" : `Week of ${fmtDay(zonedTime(monday, 12)).replace(/^\w+, /, "")}`}
           </h1>
           <p className="mt-1 text-[1.0625rem] text-ink-soft">
@@ -53,7 +53,7 @@ export default async function CalendarPage({ searchParams }: PageProps<"/practic
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {!current && (
-            <Link href={href(therapist, thisWeek)} className="mr-2 flex min-h-11 items-center font-bold text-accent underline">
+            <Link href={href(therapist, thisWeek)} className="mr-2 flex min-h-11 items-center font-semibold text-accent-deep underline underline-offset-4">
               Back to this week
             </Link>
           )}
@@ -84,7 +84,7 @@ export default async function CalendarPage({ searchParams }: PageProps<"/practic
                 key={item.id}
                 href={href(item, monday)}
                 aria-current={item.id === therapist.id ? "page" : undefined}
-                className={`flex min-h-11 shrink-0 items-center rounded-full border-[1.5px] px-4 font-bold ${
+                className={`flex min-h-11 shrink-0 items-center rounded-full border-[1.5px] px-4 font-semibold ${
                   item.id === therapist.id ? "border-dusk bg-dusk text-white" : "border-edge bg-surface text-ink-soft hover:border-dusk hover:text-ink"
                 }`}
               >
@@ -113,13 +113,13 @@ export default async function CalendarPage({ searchParams }: PageProps<"/practic
 function Tile({ is, count, label, href, loud = false, className = "" }: { is: Tone; count: number; label: string; href?: string; loud?: boolean; className?: string }) {
   const body = (
     <>
-      <p className={`font-display text-[2.2rem] font-medium leading-none tabular-nums ${loud ? "text-flag" : "text-dusk"}`}>{count}</p>
+      <p className={`font-display text-[2.375rem] leading-none tracking-[-0.02em] tabular-nums ${loud ? "text-flag" : "text-dusk"}`}>{count}</p>
       <p className="mt-1.5 text-[0.9375rem] font-bold leading-tight">{label}</p>
     </>
   );
   const classes = `tile ${loud ? "!bg-flag-tint" : ""} ${className}`;
   return href ? (
-    <Link href={href} style={tone(is)} className={`${classes} hover:outline hover:outline-[1.5px] hover:outline-ink`}>
+    <Link href={href} style={tone(is)} className={`${classes}`}>
       {body}
     </Link>
   ) : (
@@ -132,7 +132,7 @@ function Tile({ is, count, label, href, loud = false, className = "" }: { is: To
 function Key({ is, children }: { is: Tone; children: React.ReactNode }) {
   return (
     <li className="flex items-center gap-2">
-      <span aria-hidden="true" className="h-4 w-[5px] rounded-sm bg-(--c)" style={tone(is)} />
+      <span aria-hidden="true" className="size-3 rounded-[4px] bg-(--c)" style={tone(is)} />
       {children}
     </li>
   );
@@ -143,7 +143,7 @@ const isSameDay = (a: Day, b: Day) => compareDays(a, b) === 0;
 /** Wide screens: the week as a page of the front desk's day-book, hours down the side, days across. */
 function WeekGrid({ week, today }: { week: WeekView; today: Day }) {
   return (
-    <div className="mt-3 hidden overflow-x-auto rounded-[0.5rem] border border-edge lg:block">
+    <div className="mt-3 hidden overflow-x-auto rounded-2xl border border-edge lg:block">
       <table className="w-full min-w-[46rem] table-fixed border-collapse">
         <thead>
           <tr>
@@ -152,10 +152,10 @@ function WeekGrid({ week, today }: { week: WeekView; today: Day }) {
               <th
                 key={dayKey(day)}
                 scope="col"
-                className={`border-b border-l border-edge px-3 py-2.5 text-left font-bold ${isSameDay(day, today) ? "bg-dusk text-white" : "bg-paper"}`}
+                className={`border-b border-l border-edge px-3 py-2.5 text-left font-bold ${isSameDay(day, today) ? "bg-accent-tint text-accent-deep" : "bg-paper"}`}
               >
                 {fmtDay(zonedTime(day, 12))}
-                {isSameDay(day, today) && <span className="ml-2 font-display text-[0.9375rem] font-normal italic text-dusk-soft">today</span>}
+                {isSameDay(day, today) && <span className="ml-2 text-[0.9375rem] font-normal">today</span>}
               </th>
             ))}
           </tr>
@@ -196,7 +196,7 @@ function CellBody({ cell }: { cell: Cell }) {
   if (cell.kind === "off") return null;
   if (cell.kind === "open") {
     return cell.past ? null : (
-      <p className="grid h-full place-items-center rounded-[0.3125rem] border-[1.5px] border-dashed border-rule font-display text-[0.9375rem] italic text-muted">Open</p>
+      <p className="grid h-full place-items-center rounded-lg border-[1.5px] border-dashed border-rule text-[0.9375rem] text-muted">Open</p>
     );
   }
   if (cell.kind === "gone") {
@@ -225,14 +225,14 @@ function DayList({ week, today }: { week: WeekView; today: Day }) {
         const working = cells.filter((cell) => cell.kind !== "off");
         return (
           <section key={dayKey(day)}>
-            <h2 className={`rounded-t-[0.375rem] px-3 py-2 font-bold ${isSameDay(day, today) ? "bg-dusk text-white" : "bg-paper"}`}>
+            <h2 className={`rounded-t-xl px-3 py-2 font-bold ${isSameDay(day, today) ? "bg-accent-tint text-accent-deep" : "bg-paper"}`}>
               {fmtDay(zonedTime(day, 12))}
-              {isSameDay(day, today) && <span className="ml-2 font-display font-normal italic text-dusk-soft">today</span>}
+              {isSameDay(day, today) && <span className="ml-2 font-normal">today</span>}
             </h2>
             {working.length === 0 ? (
-              <p className="off-hours rounded-b-[0.375rem] border border-edge px-3 py-3 text-muted">Not in the office.</p>
+              <p className="off-hours rounded-b-xl border border-edge px-3 py-3 text-muted">Not in the office.</p>
             ) : (
-              <ul className="grid gap-1 rounded-b-[0.375rem] border border-edge p-1">
+              <ul className="grid gap-1 rounded-b-xl border border-edge p-1">
                 {working.map((cell) => (
                   <li key={cell.startsAt.toISOString()} className="grid min-h-[3.25rem] grid-cols-[4.75rem_minmax(0,1fr)] items-stretch">
                     <span className="self-center whitespace-nowrap px-2 text-[0.9375rem] font-bold tabular-nums text-muted">{fmtTime(cell.startsAt)}</span>

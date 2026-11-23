@@ -33,7 +33,7 @@ export default async function AppointmentDetailPage({ params }: PageProps<"/prac
         Back to the calendar
       </Link>
       <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-2">
-        <h1 className="font-display text-[2.25rem] font-medium leading-[1.05] tracking-[-0.01em] text-dusk lg:text-[2.6rem]">{client.name}</h1>
+        <h1 className="font-display text-[2.25rem] leading-[1.05] tracking-[-0.01em] text-dusk lg:text-[2.6rem]">{client.name}</h1>
         <AppointmentChip status={appointment.status} />
       </div>
 
@@ -80,7 +80,7 @@ export default async function AppointmentDetailPage({ params }: PageProps<"/prac
           </section>
 
           {opening && (
-            <p className="panel border-l-[6px] !border-l-flag px-5 py-4 leading-relaxed">
+            <p className="panel !border-flag/35 !bg-flag-tint px-5 py-4 leading-relaxed">
               <strong className="font-bold">Cancelled {appointment.cancelledAt ? fmtDateTime(appointment.cancelledAt) : ""}.</strong>{" "}
               <Link href={`/practice/cancellations#${opening.id}`} className="font-bold text-accent underline">
                 See what happened to the time
@@ -92,7 +92,7 @@ export default async function AppointmentDetailPage({ params }: PageProps<"/prac
 
       {preview && (
         <section className="panel border-t-[6px] !border-t-accent px-5 py-4">
-          <h2 className="font-display text-2xl font-medium text-dusk">If this is cancelled</h2>
+          <h2 className="font-display text-2xl text-dusk">If this is cancelled</h2>
           {preview.tooLate ? (
             <p className="mt-2 max-w-[65ch] leading-relaxed text-ink-soft">
               It is less than {OFFER_CUTOFF_HOURS} hours away, too late to offer to the waitlist. The time would simply open for the front desk to fill.
@@ -105,10 +105,10 @@ export default async function AppointmentDetailPage({ params }: PageProps<"/prac
                 The time is offered to these waitlisted clients in this order, one at a time. Each has {OFFER_WINDOW_MINUTES} minutes to take it before it
                 passes on.
               </p>
-              <ol className="mt-3 divide-y divide-line rounded-[0.375rem] border border-line bg-paper">
+              <ol className="mt-3 divide-y divide-line rounded-xl border border-line bg-paper">
                 {preview.eligible.map((verdict, index) => (
                   <li key={verdict.candidate.entryId} className="flex flex-wrap items-baseline gap-x-4 px-4 py-3">
-                    <span className="w-5 font-display text-xl font-medium text-accent">{index + 1}</span>
+                    <span className="w-5 font-display text-xl text-accent">{index + 1}</span>
                     <span className="flex-1 font-bold">{verdict.candidate.clientName}</span>
                     <span className="text-muted">{verdict.reason}</span>
                   </li>

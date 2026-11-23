@@ -85,7 +85,7 @@ export function HandoffCard({ path, children }: { path: string; children: React.
   return (
     <div className="flex flex-wrap items-start gap-x-5 gap-y-3">
       <svg viewBox={`0 0 ${size} ${size}`} role="img" aria-label="QR code that opens this demo on your phone" shapeRendering="crispEdges" className="size-44 shrink-0 rounded-sm border border-line bg-white">
-        {view.qr.map((row, y) => row.split("").map((cell, x) => (cell === "1" ? <rect key={`${x}-${y}`} x={x + QUIET} y={y + QUIET} width={1} height={1} fill="#2b2230" /> : null)))}
+        {view.qr.map((row, y) => row.split("").map((cell, x) => (cell === "1" ? <rect key={`${x}-${y}`} x={x + QUIET} y={y + QUIET} width={1} height={1} fill="#2e2228" /> : null)))}
       </svg>
       <div className="min-w-0 flex-1 basis-48">
         <div className="leading-relaxed">{children}</div>

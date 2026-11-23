@@ -22,7 +22,7 @@ export function FoolIt({ children, attempts, className = "" }: { children: React
   }
 
   return (
-    <aside className={`max-w-[44rem] rounded-[0.375rem] border-[1.5px] border-dashed border-amber bg-amber-tint/60 px-4 py-3 ${className}`}>
+    <aside className={`max-w-[44rem] rounded-2xl border-[1.5px] border-dashed border-amber bg-amber-tint/50 px-5 py-4 ${className}`}>
       <p className="eyebrow !text-amber">In this demo: try to fool it</p>
       <p className="mt-1 leading-relaxed text-ink">{children}</p>
       <div className="mt-3 flex flex-wrap gap-2">
@@ -34,7 +34,7 @@ export function FoolIt({ children, attempts, className = "" }: { children: React
       </div>
       <div aria-live="polite">
         {tried && (
-          <div key={tried.label} className="arrive mt-3 rounded-[0.375rem] border border-edge bg-surface px-4 py-3">
+          <div key={tried.label} className="arrive mt-3 rounded-xl border border-edge bg-surface px-4 py-3">
             <p className="eyebrow">You tried: {tried.label}</p>
             {tried.result.ok ? (
               <p className="mt-1 font-bold text-flag">It went through. That should not happen: please tell ChopMedia.</p>

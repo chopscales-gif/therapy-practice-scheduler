@@ -47,9 +47,9 @@ export function WaitlistForm({ therapists }: { therapists: TherapistOption[] }) 
   if (joined) {
     return (
       <div className="arrive grid gap-5">
-        <div className="max-w-[44rem] rounded-[0.5rem] border-l-[6px] border-good bg-good-tint px-5 py-5">
+        <div className="max-w-[44rem] rounded-2xl border border-good/20 bg-good-tint px-6 py-6">
           <p><span className="pill" style={tone("good")}>On the waitlist</span></p>
-          <h2 className="mt-2 font-display text-[1.75rem] font-medium leading-tight text-good">You are on the waitlist</h2>
+          <h2 className="display mt-3 text-[1.875rem] text-good">You are on the waitlist</h2>
           <p className="mt-2 leading-relaxed">
             When a time that fits opens up, we will send you a link. It is held for you for {OFFER_WINDOW_MINUTES} minutes. If you pass, or miss it, you keep your place.
           </p>

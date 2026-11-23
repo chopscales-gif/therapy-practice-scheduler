@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { StepHeading, SiteFrame } from "@/components/site";
 import { OFFER_WINDOW_MINUTES } from "@/lib/practice";
 import { WaitlistForm } from "@/components/waitlist-form";
@@ -24,12 +25,12 @@ export default async function WaitlistPage() {
       }
       lede="Tell us when you could come. When someone cancels a time that fits, it is offered to whoever has waited longest, one person at a time."
       card={
-        <div className="ticket px-4 pb-4 pt-3.5 sm:px-[26px] sm:pb-[26px] sm:pt-[22px]">
-          <p className="pb-2.5 font-display text-xl font-medium italic sm:text-[1.3rem]">How the waitlist works</p>
+        <div className="ticket px-5 pb-4 pt-4 sm:px-7 sm:pb-5 sm:pt-6">
+          <p className="pb-2.5 font-display text-[1.375rem] tracking-[-0.01em] sm:text-2xl">How the waitlist works</p>
           <ol>
             {STEPS.map((step, index) => (
-              <li key={step} className="grid grid-cols-[2.25rem_minmax(0,1fr)] items-baseline border-t border-dashed border-rule py-2.5 leading-snug">
-                <span className="font-display text-[1.55rem] font-medium text-accent">{index + 1}</span>
+              <li key={step} className="grid grid-cols-[2.25rem_minmax(0,1fr)] items-baseline border-t border-line py-3 leading-snug">
+                <span className="font-display text-[1.55rem] text-accent">{index + 1}</span>
                 {step}
               </li>
             ))}
@@ -38,8 +39,11 @@ export default async function WaitlistPage() {
       }
     >
       <StepHeading n={1}>When could you come?</StepHeading>
-      <div className="mt-5 max-w-[40rem]">
+      <div className="mt-5 grid items-start gap-x-16 lg:grid-cols-[minmax(0,40rem)_minmax(0,1fr)]">
         <WaitlistForm therapists={therapists.map(({ id, name, credentials, focus, offersVideo }) => ({ id, name, credentials, focus, offersVideo }))} />
+        <div className="relative aspect-[4/5] max-h-[38rem] w-full overflow-hidden rounded-[1.75rem] shadow-rest max-lg:hidden">
+          <Image src="/photos/mug.jpg" alt="" fill sizes="(min-width: 1024px) 36vw, 0px" className="object-cover" />
+        </div>
       </div>
     </SiteFrame>
   );

@@ -11,14 +11,14 @@ export default async function PracticeLayout({ children }: LayoutProps<"/practic
   const { practice } = ctx;
   return (
     <div className="flex flex-1 flex-col bg-desk lg:grid lg:grid-cols-[15rem_minmax(0,1fr)]">
-      <div className="on-dusk bg-dusk text-white">
+      <div className="border-edge bg-surface text-ink max-lg:border-b lg:border-r">
         <div className="flex flex-col px-4 py-2.5 lg:sticky lg:top-0 lg:min-h-[min(100%,calc(100vh-5.5rem))] lg:px-0 lg:pb-8 lg:pt-7">
           <Link href="/practice" className="flex min-h-11 items-center gap-3 self-start rounded-sm lg:ml-3 lg:px-2">
-            <LarkspurMark className="h-8 w-5 shrink-0 text-lark-pale lg:h-10 lg:w-6" />
+            <LarkspurMark className="h-8 w-5 shrink-0 text-accent lg:h-10 lg:w-6" />
             <FrontDeskSign />
           </Link>
           <PracticeNav waiting={waiting.length} offering={offering} messages={messages} />
-          <p className="mt-auto hidden px-5 pt-10 text-sm leading-relaxed text-dusk-soft lg:block">
+          <p className="mt-auto hidden px-5 pt-10 text-sm leading-relaxed text-muted lg:block">
             The practice side of the demo: what the front desk at {practice.name} would see.
           </p>
         </div>

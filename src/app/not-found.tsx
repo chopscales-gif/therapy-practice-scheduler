@@ -20,16 +20,16 @@ export default function NotFound() {
       lede="The address may be mistyped, or the link may have run out."
     >
       <section className="max-w-[44rem]">
-        <h2 className="font-display text-[1.7rem] font-medium leading-tight text-dusk">Where would you like to go?</h2>
+        <h2 className="font-display text-[1.7rem] leading-tight text-dusk">Where would you like to go?</h2>
         <ul className="mt-4 grid gap-2.5">
           {PLACES.map((place) => (
             <li key={place.href}>
               <Link href={place.href} className="choice group min-h-16 items-center justify-between gap-4 px-5 py-3">
                 <span>
-                  <span className="block font-display text-xl font-medium group-hover:text-accent">{place.title}</span>
+                  <span className="block text-[1.125rem] font-semibold group-hover:text-accent-deep">{place.title}</span>
                   <span className="text-[0.9375rem] text-muted">{place.note}</span>
                 </span>
-                <span aria-hidden="true" className="font-display text-2xl text-accent">
+                <span aria-hidden="true" className="text-2xl text-accent">
                   &rarr;
                 </span>
               </Link>

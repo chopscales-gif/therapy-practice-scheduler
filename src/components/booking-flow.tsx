@@ -13,7 +13,7 @@ export type SlotOption = { therapistId: string; iso: string; dayKey: string; wee
 /** One working week of the booking window, Monday to Friday. */
 export type WeekOption = { key: string; label: string; days: { dayKey: string; weekday: string; date: string }[] };
 
-type Props = { therapists: TherapistOption[]; slots: SlotOption[]; weeks: WeekOption[]; children?: React.ReactNode };
+type Props = { therapists: TherapistOption[]; slots: SlotOption[]; weeks: WeekOption[]; below?: React.ReactNode; children?: React.ReactNode };
 
 export const initialsOf = (name: string) =>
   name
@@ -27,7 +27,7 @@ export const initialsOf = (name: string) =>
  * Three choices on one page: who, when, and how to reach you. The appointment
  * card beside the headline fills in as they are made.
  */
-export function BookingFlow({ therapists, slots, weeks, children }: Props) {
+export function BookingFlow({ therapists, slots, weeks, below, children }: Props) {
   const router = useRouter();
   const [therapistId, setTherapistId] = useState<string>("any");
   const [mode, setMode] = useState<Mode>("office");
@@ -86,7 +86,7 @@ export function BookingFlow({ therapists, slots, weeks, children }: Props) {
       data-story="slot"
       aria-pressed={isPicked(slot)}
       onClick={() => setPicked(slot)}
-      className="choice min-h-12 flex-col items-start justify-center px-3 py-1.5 text-left leading-tight"
+      className="choice min-h-12 flex-col items-start justify-center !rounded-xl px-3.5 py-2 text-left leading-tight"
     >
       <span className="text-[1.0625rem] font-bold tabular-nums">{slot.time}</span>
       {therapistId === "any" && <span className="choice-note text-[0.8125rem]">{byId.get(slot.therapistId)!.name}</span>}
@@ -98,6 +98,7 @@ export function BookingFlow({ therapists, slots, weeks, children }: Props) {
   return (
     <SiteFrame
       loud
+      below={below}
       title={
         <>
           A time that suits you, <em>this week.</em>
@@ -118,22 +119,22 @@ export function BookingFlow({ therapists, slots, weeks, children }: Props) {
         />
       }
     >
-      <form onSubmit={submit} className="grid grid-cols-[minmax(0,1fr)] gap-[34px]">
+      <form onSubmit={submit} className="grid grid-cols-[minmax(0,1fr)] gap-12">
         <section aria-labelledby="who" data-story="who">
           <StepHeading n={1} id="who">
             Who would you like to see?
           </StepHeading>
-          <div className="mt-4 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
-            <label className="choice items-start gap-3 px-4 py-3.5">
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <label className="choice items-start gap-3.5 px-[1.125rem] py-4 shadow-rest">
               <input type="radio" name="therapist" className="sr-only" checked={therapistId === "any"} onChange={() => chooseTherapist("any")} />
-              <span className="initials shrink-0 !text-[0.8125rem] uppercase tracking-[0.04em]">Any</span>
+              <span className="initials shrink-0 !text-[0.9375rem]">Any</span>
               <span className="grid">
                 <span className="text-[1.0625rem] font-bold leading-tight">First available</span>
                 <span className="choice-note mt-0.5 text-[0.9375rem] leading-snug">Every open time, with whoever is free</span>
               </span>
             </label>
             {therapists.map((therapist, index) => (
-              <label key={therapist.id} data-story={`therapist-${index}`} className="choice items-start gap-3 px-4 py-3.5">
+              <label key={therapist.id} data-story={`therapist-${index}`} className="choice items-start gap-3.5 px-[1.125rem] py-4 shadow-rest">
                 <input type="radio" name="therapist" className="sr-only" checked={therapistId === therapist.id} onChange={() => chooseTherapist(therapist.id)} />
                 <span className="initials shrink-0">{initialsOf(therapist.name)}</span>
                 <span className="grid">
@@ -141,7 +142,7 @@ export function BookingFlow({ therapists, slots, weeks, children }: Props) {
                     {therapist.name}, {therapist.credentials}
                   </span>
                   <span className="choice-note mt-0.5 text-[0.9375rem] leading-snug">{therapist.focus}</span>
-                  <span className="choice-note mt-1 text-[0.8125rem] font-bold uppercase tracking-[0.06em]">{therapist.offersVideo ? "In person or video" : "In person only"}</span>
+                  <span className="choice-note mt-1.5 text-[0.875rem] font-semibold">{therapist.offersVideo ? "In person or video" : "In person only"}</span>
                 </span>
               </label>
             ))}
@@ -168,14 +169,14 @@ export function BookingFlow({ therapists, slots, weeks, children }: Props) {
           {videoUnavailable && <p className="mt-2 text-[0.9375rem] text-muted sm:text-right">{chosen!.name} sees clients in person only.</p>}
 
           {matching.length === 0 || !week ? (
-            <p className="mt-4 rounded-[0.5rem] border-[1.5px] border-dashed border-rule px-4 py-4 leading-relaxed">
-              No open times in the next three weeks. <Link href="/waitlist" className="font-bold text-accent underline">Join the waitlist</Link> and you
+            <p className="mt-4 rounded-2xl border-[1.5px] border-dashed border-rule px-5 py-4 leading-relaxed">
+              No open times in the next three weeks. <Link href="/waitlist" className="font-semibold text-accent-deep underline underline-offset-4">Join the waitlist</Link> and you
               will be offered the first cancellation that fits.
             </p>
           ) : (
             <>
               <div className="mt-4 flex items-center justify-between gap-3">
-                <p className="font-display text-xl font-medium text-dusk" aria-live="polite">
+                <p className="text-xl font-semibold text-dusk" aria-live="polite">
                   {week.label}
                 </p>
                 <div className="flex gap-2">
@@ -189,16 +190,16 @@ export function BookingFlow({ therapists, slots, weeks, children }: Props) {
               </div>
 
               {/* Laptop: the working week side by side, like a page of the appointment book. */}
-              <div className="mt-3 hidden grid-cols-5 gap-2.5 lg:grid" role="group" aria-label="Open times this week">
+              <div className="mt-4 hidden grid-cols-5 gap-3 rounded-[1.5rem] bg-paper p-4 lg:grid" role="group" aria-label="Open times this week">
                 {week.days.map((day) => {
                   const times = byDay.get(day.dayKey) ?? [];
                   return (
                     <div key={day.dayKey} className="min-w-0">
-                      <p className="mb-2.5 border-b-2 border-ink pb-1.5 leading-tight">
+                      <p className="mb-3 px-1 leading-tight">
                         <span className="font-bold">{day.weekday}</span> <span className="text-muted">{day.date}</span>
                       </p>
                       {times.length === 0 ? (
-                        <p className="rounded-[0.5rem] border-[1.5px] border-dashed border-rule px-3 py-3 text-[0.9375rem] leading-snug text-muted">{nothing}</p>
+                        <p className="rounded-2xl border-[1.5px] border-dashed border-rule px-3 py-3 text-[0.9375rem] leading-snug text-muted">{nothing}</p>
                       ) : (
                         <div className="grid gap-2">{times.map(timeButton)}</div>
                       )}
@@ -235,7 +236,7 @@ export function BookingFlow({ therapists, slots, weeks, children }: Props) {
 
               <p className="mt-4 text-[0.9375rem] text-muted">
                 Sessions are {SESSION_MINUTES} minutes. Times are Mountain Time. Nothing that suits you?{" "}
-                <Link href="/waitlist" className="font-bold text-accent underline">
+                <Link href="/waitlist" className="font-semibold text-accent-deep underline underline-offset-4">
                   Join the waitlist
                 </Link>
                 .
@@ -252,7 +253,7 @@ export function BookingFlow({ therapists, slots, weeks, children }: Props) {
             <div className="mt-4 max-w-[40rem]">
               <PersonFields value={person} onChange={setPerson} />
             </div>
-            <div className="mt-6 max-w-[40rem] border-t-2 border-ink pt-4">
+            <div className="mt-6 max-w-[40rem] rounded-2xl bg-paper px-5 py-4">
               <p className="text-[1.0625rem] leading-relaxed">
                 <strong className="font-bold">
                   {selection.weekday}, {selection.date} at {selection.time}

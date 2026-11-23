@@ -36,5 +36,5 @@ export function proxy(request: NextRequest) {
 
 // A hand-off link (/join/...) sets the cookie itself, so it must not be given a new sandbox first.
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|robots.txt|join/).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|robots.txt|photos/|join/).*)"],
 };

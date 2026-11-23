@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { usePractice } from "./practice-context";
@@ -19,21 +20,16 @@ export function LarkspurMark({ className = "" }: { className?: string }) {
   );
 }
 
-const NAV = [
-  { href: "/", label: "Book an appointment" },
-  { href: "/waitlist", label: "Join the waitlist" },
-];
-
-const shell = "mx-auto w-full max-w-[86rem] px-5 sm:px-8 lg:px-12";
+const shell = "mx-auto w-full max-w-[84rem] px-5 sm:px-8 lg:px-12";
 
 /** The practice's name as its sign reads: the fictional one in two lines, a visitor's own in one. */
 export function PracticeSign({ under }: { under?: string }) {
   const practice = usePractice();
   const second = under ?? (practice.custom ? null : `Counseling, ${practice.city.split(",")[0]}`);
   return (
-    <span className="min-w-0 font-display text-[1.375rem] font-medium leading-[1.1] [overflow-wrap:anywhere]">
+    <span className="min-w-0 font-display text-[1.4375rem] leading-[1.1] tracking-[-0.01em] [overflow-wrap:anywhere]">
       {practice.custom ? practice.name : "Larkspur"}
-      {second && <span className="block text-[0.9375rem] font-normal italic opacity-75">{second}</span>}
+      {second && <span className="block font-sans text-[0.875rem] tracking-normal opacity-70">{second}</span>}
     </span>
   );
 }
@@ -44,72 +40,110 @@ type FrameProps = {
   lede?: React.ReactNode;
   /** A line above the headline, such as a greeting. */
   greeting?: string;
-  /** The appointment card, set beside the headline and reaching down into the page. */
+  /** The appointment card, set beside the headline on the photograph. */
   card?: React.ReactNode;
   /** The booking page speaks loudest. Every other page uses the quieter size. */
   loud?: boolean;
+  /** Full-width sections under the work of the page, such as how the practice runs. */
+  below?: React.ReactNode;
   children: React.ReactNode;
 };
 
 /**
- * The practice's public website, around every client-side page. The headline
- * sits on the practice's paper with the appointment card beside it; the card
- * overlaps the white sheet below, where the work of the page happens.
+ * The practice's public website, around every client-side page. A white header,
+ * then the first screen: a photograph of a calm room set in from the edges with
+ * rounded corners, the headline on it and the appointment card beside it. The
+ * work of the page happens on the paper below.
  */
-export function SiteFrame({ title, lede, greeting, card, loud = false, children }: FrameProps) {
+export function SiteFrame({ title, lede, greeting, card, loud = false, below, children }: FrameProps) {
   const practice = usePractice();
   const pathname = usePathname();
   return (
-    <div className="flex flex-1 flex-col">
-      <header className="relative z-10">
-        <div className={`${shell} flex flex-wrap items-center justify-between gap-x-8 gap-y-1 pt-4 sm:pt-6`}>
-          <Link href="/" className="flex min-h-11 items-center gap-3 rounded-sm text-dusk">
-            <LarkspurMark className="h-10 w-6 shrink-0 text-lark" />
-            <PracticeSign />
+    <div className="flex flex-1 flex-col bg-surface">
+      <header className={`${shell} flex flex-wrap items-center justify-between gap-x-8 gap-y-1 py-3 sm:py-4`}>
+        <Link href="/" className="flex min-h-11 items-center gap-3 rounded-sm text-dusk">
+          <LarkspurMark className="h-10 w-6 shrink-0 text-accent" />
+          <PracticeSign />
+        </Link>
+        <nav aria-label={`${practice.shortName} website`} className="flex flex-wrap items-center gap-x-2 sm:gap-x-3">
+          <span className="mr-3 whitespace-nowrap font-semibold tabular-nums text-ink-soft max-md:hidden">{practice.phone}</span>
+          <Link
+            href="/waitlist"
+            aria-current={pathname === "/waitlist" ? "page" : undefined}
+            className={`btn min-h-11 px-4 max-sm:hidden ${pathname === "/waitlist" ? "bg-accent-tint text-accent-deep" : "text-ink hover:bg-paper"}`}
+          >
+            Join the waitlist
           </Link>
-          <nav aria-label={`${practice.shortName} website`} className="flex flex-wrap items-center gap-x-7">
-            {NAV.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={pathname === item.href ? "page" : undefined}
-                className={`flex min-h-11 items-center font-bold underline-offset-[6px] hover:text-accent ${pathname === item.href ? "text-dusk underline decoration-accent decoration-2" : "text-ink-soft"}`}
-              >
-                {item.label}
-              </Link>
-            ))}
-            <span className="whitespace-nowrap font-bold tabular-nums text-dusk max-sm:hidden">{practice.phone}</span>
-          </nav>
-        </div>
-        <div className={`${shell} grid items-end gap-x-10 gap-y-6 pt-6 sm:pt-9 ${card ? "lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]" : ""}`}>
-          <div className={card ? "pb-2 lg:pb-12" : "pb-8 lg:pb-12"}>
-            {greeting && <p className="mb-1 font-display text-xl italic text-muted sm:text-2xl">{greeting}</p>}
-            <h1
-              className={`font-display font-medium tracking-[-0.015em] text-dusk [&_em]:not-italic [&_em]:text-accent ${
-                loud ? "text-[clamp(2.6rem,6.2vw,5.4rem)] leading-[0.96]" : "text-[clamp(2.25rem,4.6vw,3.75rem)] leading-[1]"
-              }`}
-            >
-              {title}
-            </h1>
-            {lede && <p className="mt-4 max-w-[40ch] text-[1.125rem] leading-relaxed text-muted sm:mt-5 sm:text-[1.2rem]">{lede}</p>}
-          </div>
-          {card && <div className="-mb-[34px] min-w-0 lg:justify-self-end lg:w-full lg:max-w-[30rem]">{card}</div>}
-        </div>
+          <Link href="/" aria-current={pathname === "/" ? "page" : undefined} className="btn btn-primary min-h-11 max-sm:px-4">
+            <span>
+              Book<span className="max-sm:sr-only"> an appointment</span>
+            </span>
+          </Link>
+        </nav>
       </header>
 
-      <div className="flex flex-1 flex-col border-t border-line bg-surface">
-        <main className={`${shell} flex-1 pb-12 ${card ? "pt-[70px] lg:pt-16" : "pt-9 lg:pt-12"}`}>{children}</main>
-        <footer className="border-t border-line">
-          <p className={`${shell} max-w-[86rem] py-5 text-sm leading-relaxed text-muted`}>
+      <div className="px-2.5 sm:px-4">
+        <section className={`relative isolate mx-auto max-w-[110rem] overflow-hidden rounded-[1.75rem] sm:rounded-[2.25rem] ${loud ? "lg:min-h-[min(41rem,calc(100vh-11rem))]" : ""} lg:flex lg:items-center`}>
+          <Image src="/photos/room.jpg" alt="" fill preload sizes="100vw" className="-z-20 object-cover" />
+          <div aria-hidden className="hero-wash absolute inset-0 -z-10" />
+          <div className={`${shell} grid items-center gap-x-12 gap-y-7 ${loud ? "py-9 sm:py-14 lg:py-16" : "py-8 sm:py-12 lg:py-14"} ${card ? "lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]" : ""}`}>
+            <div className={card ? "" : "max-w-[52rem]"}>
+              {greeting && <p className="mb-3 text-lg font-semibold text-accent-deep sm:text-xl">{greeting}</p>}
+              <h1
+                className={`display text-dusk [&_em]:not-italic [&_em]:text-accent ${
+                  loud ? "text-[clamp(2.6rem,6vw,5.25rem)] leading-[1]" : "text-[clamp(2.25rem,4.4vw,3.75rem)]"
+                }`}
+              >
+                {title}
+              </h1>
+              {lede && <p className={`mt-5 max-w-[42ch] text-[1.125rem] leading-relaxed text-ink-soft sm:text-[1.25rem]`}>{lede}</p>}
+            </div>
+            {card && <div className="min-w-0 lg:w-full lg:max-w-[30rem] lg:justify-self-end">{card}</div>}
+          </div>
+        </section>
+      </div>
+
+      <main className={`${shell} flex-1 pb-16 pt-10 lg:pb-20 lg:pt-14`}>{children}</main>
+      {below}
+
+      <footer className="on-dusk mt-auto bg-dusk text-white">
+        <div className={`${shell} grid gap-x-12 gap-y-8 py-12 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.3fr)] lg:py-14`}>
+          <div>
+            <p className="flex items-center gap-3">
+              <LarkspurMark className="h-10 w-6 shrink-0 text-blush" />
+              <PracticeSign />
+            </p>
+            <p className="mt-4 leading-relaxed text-dusk-soft">
+              {practice.city}
+              <br />
+              <span className="tabular-nums">{practice.phone}</span>
+            </p>
+          </div>
+          <nav aria-label="Footer" className="grid content-start gap-1">
+            <p className="mb-1 font-semibold">Appointments</p>
+            <Link href="/" className="w-fit py-1 text-dusk-soft underline-offset-4 hover:text-white hover:underline">
+              Book an appointment
+            </Link>
+            <Link href="/waitlist" className="w-fit py-1 text-dusk-soft underline-offset-4 hover:text-white hover:underline">
+              Join the waitlist
+            </Link>
+          </nav>
+          <div>
+            <p className="mb-2 font-semibold">If you need help now</p>
+            <p className="leading-relaxed text-dusk-soft">In an emergency, call 911. For the Suicide and Crisis Lifeline, call or text 988.</p>
+          </div>
+        </div>
+        <div className="border-t border-white/15">
+          <p className={`${shell} py-5 text-sm leading-relaxed text-dusk-soft`}>
             {/* A visitor's own practice is real, so only the sample data is called invented. */}
             {practice.custom
               ? "A demonstration build by ChopMedia, shown with your practice's name on invented sample data."
               : `${practice.name}, ${practice.city}, is a fictional practice in a demonstration build by ChopMedia.`}{" "}
-            In an emergency, call 911. For the Suicide and Crisis Lifeline, call or text 988. This demo is designed with HIPAA in mind. It is not HIPAA
-            compliant or certified.
+            This demo is designed with HIPAA in mind. It is not HIPAA compliant or certified. Photographs are stock images. The people shown are not
+            the practice&apos;s clients or clinicians.
           </p>
-        </footer>
-      </div>
+        </div>
+      </footer>
     </div>
   );
 }
@@ -123,19 +157,19 @@ export type CardLine = { label: string; value: string | null; note?: string | nu
 export function AppointmentCard({ heading, lines, footer, story }: { heading: string; lines: CardLine[]; footer?: React.ReactNode; story?: string }) {
   const practice = usePractice();
   return (
-    <div data-story={story} className="ticket px-4 pb-4 pt-3.5 text-ink sm:px-[26px] sm:pb-[26px] sm:pt-[22px]">
+    <div data-story={story} className="ticket px-5 pb-5 pt-4 text-ink sm:px-7 sm:pb-7 sm:pt-6">
       <p className="flex items-baseline justify-between gap-4 pb-2.5">
-        <span className="font-display text-xl font-medium italic sm:text-[1.3rem]">{heading}</span>
-        <span className="eyebrow min-w-0 truncate !text-[0.75rem]">{practice.name}</span>
+        <span className="font-display text-[1.375rem] tracking-[-0.01em] sm:text-2xl">{heading}</span>
+        <span className="eyebrow min-w-0 truncate !text-[0.75rem] max-sm:hidden">{practice.name}</span>
       </p>
       {/* Two by two on a phone, so the first choice of the page is still on the first screen. */}
       <dl className="grid grid-cols-2 gap-x-5 lg:block">
         {lines.map((line) => (
-          <div key={line.label} className="border-t border-dashed border-rule py-2 lg:grid lg:grid-cols-[4.5rem_minmax(0,1fr)] lg:items-baseline lg:gap-x-3 lg:py-2.5">
+          <div key={line.label} className="border-t border-line py-2 lg:grid lg:grid-cols-[4.5rem_minmax(0,1fr)] lg:items-baseline lg:gap-x-3 lg:py-2.5">
             <dt className="eyebrow !text-[0.75rem] lg:!text-[0.8rem]">{line.label}</dt>
             <dd className="min-h-7 lg:min-h-9">
               {line.value ? (
-                <span className={`font-display text-[1.1875rem] font-medium leading-tight lg:text-[1.55rem] ${line.struck ? "line-through decoration-flag decoration-2" : ""}`}>{line.value}</span>
+                <span className={`text-[1.125rem] font-semibold leading-tight lg:text-[1.3125rem] ${line.struck ? "line-through decoration-flag decoration-2" : ""}`}>{line.value}</span>
               ) : (
                 <span className="sr-only">Not chosen yet</span>
               )}
@@ -144,7 +178,7 @@ export function AppointmentCard({ heading, lines, footer, story }: { heading: st
           </div>
         ))}
       </dl>
-      {footer && <div className="border-t border-dashed border-rule pt-3 text-[0.9375rem] leading-snug text-ink-soft">{footer}</div>}
+      {footer && <div className="mt-1 rounded-xl bg-paper px-3.5 py-2.5 text-[0.9375rem] leading-snug text-ink-soft">{footer}</div>}
     </div>
   );
 }
@@ -152,7 +186,7 @@ export function AppointmentCard({ heading, lines, footer, story }: { heading: st
 /** The heading of one numbered step of a client page. */
 export function StepHeading({ n, id, children }: { n: number; id?: string; children: React.ReactNode }) {
   return (
-    <h2 id={id} className="flex items-center gap-3 font-display text-[1.5rem] font-medium leading-tight text-dusk sm:text-[1.7rem]">
+    <h2 id={id} className="display flex items-center gap-3 text-[1.625rem] !leading-tight text-dusk sm:text-[1.9375rem]">
       <span className="step-n">{n}</span>
       {children}
     </h2>
@@ -162,7 +196,7 @@ export function StepHeading({ n, id, children }: { n: number; id?: string; child
 /** A note from the demo to the person trying it, kept visibly apart from the practice's own screens. */
 export function DemoHint({ children, className = "", story }: { children: React.ReactNode; className?: string; story?: string }) {
   return (
-    <aside data-story={story} className={`max-w-[44rem] rounded-[0.375rem] border-[1.5px] border-dashed border-amber bg-amber-tint/60 px-4 py-3 leading-relaxed ${className}`}>
+    <aside data-story={story} className={`max-w-[44rem] rounded-2xl border-[1.5px] border-dashed border-amber bg-amber-tint/50 px-5 py-3.5 leading-relaxed ${className}`}>
       <p className="eyebrow !text-amber">In this demo</p>
       <div className="mt-1 text-ink">{children}</div>
     </aside>

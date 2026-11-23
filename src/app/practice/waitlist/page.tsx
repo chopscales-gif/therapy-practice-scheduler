@@ -36,10 +36,10 @@ export default async function WaitlistPage() {
               <li
                 key={entry.id}
                 className={`panel grid gap-x-6 gap-y-3 px-4 py-4 sm:px-5 md:grid-cols-[2.75rem_minmax(0,1.1fr)_minmax(0,1.7fr)_9.5rem] md:items-center ${
-                  hasLiveOffer ? "!border-wait border-l-[6px] !bg-amber-tint" : ""
+                  hasLiveOffer ? "!border-wait/50 !bg-amber-tint" : ""
                 }`}
               >
-                <span className="hidden font-display text-[2rem] font-medium leading-none text-accent md:block">{index + 1}</span>
+                <span className="hidden font-display text-[2rem] leading-none text-accent md:block">{index + 1}</span>
                 <div>
                   <p className="text-[1.125rem] font-bold leading-tight">
                     <span className="mr-2 font-display text-accent md:hidden">{index + 1}.</span>

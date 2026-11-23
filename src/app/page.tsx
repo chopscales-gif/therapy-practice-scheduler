@@ -1,5 +1,6 @@
 import { BookingFlow, type SlotOption, type WeekOption } from "@/components/booking-flow";
 import { FoolIt } from "@/components/fool-it";
+import { PracticeStory } from "@/components/practice-story";
 import { addDays, dayKey, dayOf, fmtTime, mondayOf, zonedTime, ZONE } from "@/lib/time";
 import { foolAction } from "@/server/actions";
 import { bookableSlots } from "@/server/queries";
@@ -39,9 +40,10 @@ export default async function BookingPage() {
       therapists={therapists.map(({ id, name, credentials, focus, offersVideo }) => ({ id, name, credentials, focus, offersVideo }))}
       slots={options}
       weeks={weeks}
+      below={<PracticeStory therapists={therapists.length} withVideo={therapists.filter((therapist) => therapist.offersVideo).length} />}
     >
       <FoolIt
-        className="mt-12"
+        className="mt-14"
         attempts={[
           { label: "Book a time someone already has", run: foolAction.bind(null, "taken") },
           { label: "Book a session that has already started", run: foolAction.bind(null, "past") },

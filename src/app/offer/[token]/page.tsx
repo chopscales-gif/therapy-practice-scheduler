@@ -55,7 +55,7 @@ export default async function OfferPage({ params }: PageProps<"/offer/[token]">)
       <div className="max-w-[44rem]">
         {offer.status === "sent" && (
           <>
-            <p className="rounded-[0.5rem] border-l-[6px] border-wait bg-amber-tint px-4 py-3 text-[1.0625rem] leading-snug">
+            <p className="rounded-2xl border border-wait/30 bg-amber-tint px-5 py-4 text-[1.0625rem] leading-snug">
               Held for you until <strong className="font-bold">{fmtTime(offer.expiresAt)}</strong> ({countOf(minutesLeft, "minute")} from now). After that
               it goes to the next person waiting.
             </p>
@@ -70,7 +70,7 @@ export default async function OfferPage({ params }: PageProps<"/offer/[token]">)
           </>
         )}
         {offer.status === "accepted" && (
-          <div className="arrive rounded-[0.5rem] border-l-[6px] border-good bg-good-tint px-5 py-4">
+          <div className="arrive rounded-2xl border border-good/20 bg-good-tint px-5 py-5">
             <p>
               <span className="pill" style={tone("good")}>
                 Booked

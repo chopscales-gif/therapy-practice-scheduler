@@ -23,7 +23,7 @@ export function PracticeNav({ waiting, offering, messages }: Counts) {
   };
 
   return (
-    <nav aria-label="Practice workspace" className="fixed inset-x-0 bottom-0 z-10 flex gap-1 border-t border-white/20 bg-dusk p-1.5 lg:static lg:mt-8 lg:flex-col lg:border-t-0 lg:p-0 lg:px-3">
+    <nav aria-label="Practice workspace" className="fixed inset-x-0 bottom-0 z-10 flex gap-1 border-t border-edge bg-surface p-1.5 shadow-[0_-8px_24px_-16px_rgba(61,36,49,0.35)] lg:static lg:shadow-none lg:mt-8 lg:flex-col lg:border-t-0 lg:p-0 lg:px-3">
       {ITEMS.map((item) => {
         const active = isActive(item.href);
         const badge = badges[item.href];
@@ -32,15 +32,15 @@ export function PracticeNav({ waiting, offering, messages }: Counts) {
             key={item.href}
             href={item.href}
             aria-current={active ? "page" : undefined}
-            className={`flex min-h-11 flex-1 items-center justify-center gap-2 rounded-[0.375rem] px-1 text-[0.875rem] font-bold lg:flex-none lg:justify-between lg:px-3 lg:text-[1.0625rem] ${
-              active ? "bg-white text-dusk" : "text-dusk-soft hover:bg-white/10 hover:text-white"
+            className={`flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-1 text-[0.875rem] font-semibold lg:flex-none lg:justify-between lg:px-3 lg:text-[1.0625rem] ${
+              active ? "bg-accent-tint text-accent-deep" : "text-ink-soft hover:bg-paper hover:text-ink"
             }`}
           >
             {item.label}
             {badge && badge.count > 0 && (
               <span
                 className={`hidden min-w-7 rounded-full px-2 text-center text-[0.875rem] leading-6 tabular-nums lg:inline ${
-                  badge.urgent ? "bg-amber-tint text-amber" : active ? "bg-dusk text-white" : "bg-dusk-mid text-white"
+                  badge.urgent ? "bg-amber-tint text-amber" : active ? "bg-surface text-accent-deep" : "bg-desk text-ink-soft"
                 }`}
               >
                 {badge.count}

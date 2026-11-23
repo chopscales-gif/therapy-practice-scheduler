@@ -29,21 +29,21 @@ export default function AboutPage() {
     <main className="w-full flex-1 bg-surface">
       <div className="mx-auto w-full max-w-[64rem] px-4 pb-16 pt-10 sm:px-6 lg:px-10 lg:pt-14">
         <p className="eyebrow">A demonstration build by ChopMedia</p>
-        <h1 className="mt-2 max-w-[20ch] font-display text-[2.75rem] font-medium leading-[1.02] tracking-[-0.015em] text-dusk sm:text-[4rem]">
-          What you <em className="text-accent">just saw</em>
+        <h1 className="mt-2 max-w-[20ch] display text-[2.75rem] text-dusk sm:text-[4rem]">
+          What you <em className="not-italic text-accent">just saw</em>
         </h1>
         <ol className="mt-7 max-w-[70ch] space-y-3.5">
           {SAW.map((line, i) => (
             <li key={line} className="grid grid-cols-[2.25rem_minmax(0,1fr)] items-baseline gap-x-2 text-lg leading-relaxed">
-              <span className="font-display text-[1.6rem] font-medium text-accent">{i + 1}</span>
+              <span className="font-display text-[1.6rem] text-accent">{i + 1}</span>
               <span>{line}</span>
             </li>
           ))}
         </ol>
 
-        <div className="mt-12 grid gap-x-12 gap-y-10 border-t-2 border-dusk pt-8 lg:grid-cols-2">
+        <div className="mt-12 grid gap-x-12 gap-y-10 border-t border-rule pt-10 lg:grid-cols-2">
           <section>
-            <h2 className="font-display text-[1.7rem] font-medium leading-tight text-dusk">What a real version would connect to</h2>
+            <h2 className="font-display text-[1.7rem] leading-tight text-dusk">What a real version would connect to</h2>
             <p className="mt-2 leading-relaxed text-ink-soft">
               Nothing here is connected to anything. Built for a practice, the same steps would be wired to the systems that practice already uses.
             </p>
@@ -58,7 +58,7 @@ export default function AboutPage() {
           </section>
 
           <section>
-            <h2 className="font-display text-[1.7rem] font-medium leading-tight text-dusk">What this demo is, and is not</h2>
+            <h2 className="font-display text-[1.7rem] leading-tight text-dusk">What this demo is, and is not</h2>
             <dl className="mt-4 space-y-4">
               <div>
                 <dt className="font-bold">No AI anywhere</dt>
@@ -87,7 +87,7 @@ export default function AboutPage() {
 
       <section className="on-dusk bg-dusk text-white">
         <div className="mx-auto w-full max-w-[64rem] px-4 py-10 sm:px-6 lg:px-10 lg:py-12">
-          <h2 className="max-w-[26ch] font-display text-[1.9rem] font-medium leading-tight sm:text-[2.5rem]">Want to see it run on your own week?</h2>
+          <h2 className="max-w-[26ch] font-display text-[1.9rem] leading-tight sm:text-[2.5rem]">Want to see it run on your own week?</h2>
           <p className="mt-3 max-w-[58ch] text-lg leading-relaxed text-white/85">
             Send me your therapists&apos; hours and how your waitlist works today, and I will set it up that way and walk you through it on a call.
           </p>
@@ -113,10 +113,10 @@ export default function AboutPage() {
             </dd>
           </dl>
           <div className="mt-8 flex flex-wrap gap-2">
-            <Link href="/" className="inline-flex min-h-11 items-center rounded-[0.375rem] bg-white px-4 font-bold text-dusk hover:bg-white/85">
+            <Link href="/" className="inline-flex min-h-11 items-center rounded-full bg-white px-5 font-semibold text-dusk hover:bg-white/85">
               Back to the client side
             </Link>
-            <Link href="/practice" className="inline-flex min-h-11 items-center rounded-[0.375rem] border-[1.5px] border-white px-4 font-bold hover:bg-white/15">
+            <Link href="/practice" className="inline-flex min-h-11 items-center rounded-full border-[1.5px] border-white/60 px-5 font-semibold hover:bg-white/15">
               Back to the practice side
             </Link>
           </div>

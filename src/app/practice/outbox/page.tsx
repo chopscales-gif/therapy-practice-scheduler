@@ -42,7 +42,7 @@ export default async function OutboxPage() {
               {message.subject && <p className="mb-2 font-bold">{message.subject}</p>}
               <p
                 className={`whitespace-pre-line [overflow-wrap:anywhere] leading-relaxed ${
-                  message.channel === "sms" ? "max-w-md rounded-2xl rounded-bl-sm bg-desk px-4 py-2.5" : "rounded-[0.375rem] border border-line bg-paper px-4 py-3"
+                  message.channel === "sms" ? "max-w-md rounded-2xl rounded-bl-sm bg-desk px-4 py-2.5" : "rounded-xl border border-line bg-paper px-4 py-3"
                 }`}
               >
                 {message.body}

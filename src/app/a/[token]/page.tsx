@@ -66,7 +66,7 @@ export default async function AppointmentPage({ params }: PageProps<"/a/[token]"
               </span>
             </p>
           )}
-          <h2 className="mt-3 font-display text-[1.7rem] font-medium leading-tight text-dusk">
+          <h2 className="display mt-4 text-[2rem] text-dusk">
             {appointment.status === "booked" ? "Let us know you are coming" : "See you then"}
           </h2>
           <p className="mt-2 text-[1.0625rem] leading-relaxed text-ink-soft">
@@ -100,7 +100,7 @@ export default async function AppointmentPage({ params }: PageProps<"/a/[token]"
       {!(active && upcoming) && (
         <p className="max-w-[44rem] text-[1.0625rem] leading-relaxed">
           {cancelled && "Nothing more is needed from you. "}
-          <Link href="/" className="font-bold text-accent underline">
+          <Link href="/" className="font-semibold text-accent-deep underline underline-offset-4">
             Book another time
           </Link>{" "}
           whenever you are ready, or call <span className="whitespace-nowrap">{ctx.practice.phone}</span>.

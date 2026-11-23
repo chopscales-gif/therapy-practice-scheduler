@@ -11,7 +11,7 @@ import { getCtx } from "@/server/session";
 export const metadata: Metadata = { title: "Cancellations" };
 
 const DOT = { neutral: "bg-open", good: "bg-accent", warn: "bg-wait" };
-const EDGE = { offering: "border-l-wait", filled: "border-l-accent", unfilled: "border-l-flag" };
+const EDGE = { offering: "border-wait/50", filled: "border-accent/30", unfilled: "border-flag/35" };
 
 export default async function CancellationsPage() {
   const ctx = await getCtx();
@@ -33,12 +33,12 @@ export default async function CancellationsPage() {
             key={opening.id}
             id={opening.id}
             data-story="opening"
-            className={`panel scroll-mt-4 border-l-[6px] ${EDGE[opening.status]} px-4 py-4 target:outline target:outline-2 target:outline-dusk sm:px-6 sm:py-5 xl:grid xl:grid-cols-[19rem_minmax(0,1fr)] xl:gap-x-8`}
+            className={`panel scroll-mt-4 ${EDGE[opening.status]} px-4 py-4 target:outline target:outline-2 target:outline-dusk sm:px-6 sm:py-5 xl:grid xl:grid-cols-[19rem_minmax(0,1fr)] xl:gap-x-8`}
           >
             <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3 xl:flex-col xl:justify-start">
               <div>
                 <p className="eyebrow">The time</p>
-                <h2 className="font-display text-[1.6rem] font-medium leading-[1.1] text-dusk">
+                <h2 className="display text-[1.5rem] !leading-[1.15] text-dusk">
                   {fmtDayLong(opening.startsAt)}
                   <span className="block">{fmtTime(opening.startsAt)}</span>
                 </h2>
@@ -52,7 +52,7 @@ export default async function CancellationsPage() {
 
             <div className="mt-4 xl:mt-0">
               {live && (
-                <div className="mb-4 rounded-[0.5rem] border-[1.5px] border-wait bg-amber-tint px-4 py-3.5">
+                <div className="mb-4 rounded-2xl border border-wait/40 bg-amber-tint px-5 py-4">
                   <p className="eyebrow !text-amber">Waiting on an answer</p>
                   <p className="mt-0.5 text-[1.125rem] leading-snug">
                     <strong className="font-bold">{live.clientName}</strong> has until <strong className="font-bold">{fmtTime(live.offer.expiresAt)}</strong> to take it (
@@ -77,12 +77,12 @@ export default async function CancellationsPage() {
               <p className="eyebrow">What happened</p>
               <ol className="mt-2">
                 {events.map((event, index) => (
-                  <li key={event.id} className={`relative grid grid-cols-[4.75rem_1fr] gap-x-3 ${index === events.length - 1 ? "arrive" : ""}`}>
+                  <li key={event.id} className={`relative grid grid-cols-[5.75rem_1fr] gap-x-3 ${index === events.length - 1 ? "arrive" : ""}`}>
                     <span className="pt-px text-right text-[0.875rem] font-bold leading-6 tabular-nums text-muted">
                       {fmtTime(event.at)}
-                      {index === 0 && <span className="block font-normal leading-tight">{fmtDay(event.at)}</span>}
+                      {index === 0 && <span className="block whitespace-nowrap font-normal leading-tight">{fmtDay(event.at)}</span>}
                     </span>
-                    <p className={`relative border-l-2 border-rule pl-4 leading-6 ${index === events.length - 1 ? "pb-0.5" : "pb-3"} ${event.tone === "good" ? "font-bold text-accent" : ""}`}>
+                    <p className={`relative border-l-2 border-rule pl-4 leading-6 ${index === events.length - 1 ? "pb-0.5" : "pb-3"} ${event.tone === "good" ? "font-bold text-accent-deep" : ""}`}>
                       <span className={`absolute -left-[0.4375rem] top-[0.4375rem] size-3 rounded-full ring-2 ring-surface ${DOT[event.tone]}`} />
                       {event.text}
                     </p>

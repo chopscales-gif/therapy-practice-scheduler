@@ -8,7 +8,7 @@ import { ActionButton } from "./action-button";
 export function ScenarioPanel({ scenario }: { scenario: Scenario }) {
   const first = scenario.clientName.split(" ")[0];
   return (
-    <aside className="rounded-[0.5rem] border-[1.5px] border-dashed border-amber bg-amber-tint/70 px-4 py-3.5 sm:px-5">
+    <aside className="rounded-2xl border-[1.5px] border-dashed border-amber bg-amber-tint/70 px-4 py-3.5 sm:px-5">
       <p className="eyebrow !text-amber">In this demo</p>
       {scenario.state === "ready" && (
         <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">

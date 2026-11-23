@@ -10,9 +10,9 @@ import type { ClockStep } from "@/server/workflow";
 import { HandoffCard } from "./handoff";
 import { useStory } from "./story";
 
-const control = "inline-flex min-h-11 cursor-pointer items-center whitespace-nowrap rounded-[0.375rem] px-2.5 font-bold lg:min-h-9";
+const control = "inline-flex min-h-11 cursor-pointer items-center whitespace-nowrap rounded-full px-2 font-semibold lg:min-h-9";
 const underlined = `${control} underline decoration-ink/40 underline-offset-4 hover:decoration-ink disabled:cursor-not-allowed disabled:opacity-60`;
-const outlined = `${control} border-[1.5px] border-ink hover:bg-ink/10 disabled:cursor-not-allowed disabled:opacity-60`;
+const outlined = `${control} border-[1.5px] border-rule bg-surface hover:border-ink disabled:cursor-not-allowed disabled:opacity-60`;
 
 /**
  * The strip across the top of every page. It is the only part of the screen
@@ -35,12 +35,12 @@ export function DemoBar({ clock, practice }: { clock: string | null; practice: P
   }
 
   const tab = (active: boolean) =>
-    `inline-flex min-h-11 items-center whitespace-nowrap rounded-[0.25rem] px-3 font-bold lg:min-h-9 ${active ? "bg-ink text-white" : "text-ink hover:bg-ink/10"}`;
+    `inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-3 font-semibold lg:min-h-9 ${active ? "bg-surface text-dusk shadow-rest" : "text-ink-soft hover:text-ink"}`;
   const problem = story.error ?? error;
 
   return (
-    <div className="demo-chrome border-b-[1.5px] border-dashed border-amber bg-amber-tint text-[0.9375rem] text-ink">
-      <div className="flex flex-wrap items-center gap-x-1 gap-y-1 px-4 py-1.5 sm:px-6">
+    <div className="demo-chrome border-b border-[#eedfb5] bg-[#fdf6e2] text-[0.9375rem] text-ink">
+      <div className="flex flex-wrap items-center gap-x-1 gap-y-1 px-4 py-2 sm:px-6">
         <p className="min-w-0 flex-1 basis-64 pr-3 leading-snug">
           <strong className="font-bold">Demonstration build.</strong>{" "}
           {/* A visitor's own practice is real, so with their name showing the bar says whose data is invented, and never that the practice is. */}
@@ -58,7 +58,7 @@ export function DemoBar({ clock, practice }: { clock: string | null; practice: P
           </Link>
         </p>
         {/* Last on a laptop, where it ends the strip. On a phone it stays beside the notice. */}
-        <nav aria-label="Demo view" className="flex items-center gap-0.5 rounded-[0.4375rem] border-[1.5px] border-ink p-0.5 xl:order-last xl:ml-2">
+        <nav aria-label="Demo view" className="flex items-center gap-0.5 rounded-full bg-[#f1e4bf] p-1 xl:order-last xl:ml-2">
           <Link href="/" className={tab(!practiceSide)} aria-current={!practiceSide ? "page" : undefined}>
             Client side
           </Link>
@@ -71,7 +71,7 @@ export function DemoBar({ clock, practice }: { clock: string | null; practice: P
           data-story="play"
           onClick={story.start}
           disabled={story.busy}
-          className={`${control} gap-2 bg-ink px-3.5 text-white hover:bg-dusk-mid disabled:cursor-not-allowed disabled:opacity-60`}
+          className={`${control} gap-2 bg-dusk px-3.5 text-white hover:bg-dusk-mid disabled:cursor-not-allowed disabled:opacity-60`}
         >
           <svg aria-hidden viewBox="0 0 12 12" className="size-3 fill-current">
             <path d="M2 1l9 5-9 5z" />
@@ -85,8 +85,8 @@ export function DemoBar({ clock, practice }: { clock: string | null; practice: P
         </Link>
         {clock && (
           <>
-            <p className="ml-1 inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-[0.375rem] border border-amber/60 bg-surface/70 px-2.5 leading-none" title="Time only moves when you skip it, so you can watch reminders go out and offers lapse.">
-              <span className="text-[0.8125rem] font-bold uppercase tracking-[0.06em] text-amber">Demo clock</span>
+            <p className="ml-1 inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-full border border-[#eedfb5] bg-surface px-3 leading-none" title="Time only moves when you skip it, so you can watch reminders go out and offers lapse.">
+              <span className="text-[0.875rem] font-semibold text-amber">Demo clock</span>
               <strong className="font-bold tabular-nums max-sm:hidden">{clock}</strong>
               <strong className="font-bold tabular-nums sm:hidden">{shortClock(clock)}</strong>
             </p>
@@ -181,7 +181,7 @@ function PracticeName({ practice }: { practice: Practice }) {
           autoComplete="organization"
           placeholder="Optional"
           aria-describedby={error ? "practice-name-error" : undefined}
-          className="min-h-11 w-full min-w-0 rounded-[0.375rem] border-[1.5px] border-ink bg-white px-3 text-base text-ink placeholder:text-muted sm:w-72 lg:min-h-9"
+          className="min-h-11 w-full min-w-0 rounded-full border-[1.5px] border-rule bg-white px-4 text-base text-ink placeholder:text-muted sm:w-72 lg:min-h-9"
         />
         <button type="submit" disabled={pending} className={outlined}>
           {pending ? "Showing it" : "Show it"}
@@ -219,7 +219,7 @@ function PhoneHandoff({ path }: { path: string }) {
       </button>
       <dialog ref={dialog} onClose={() => setOpen(false)} aria-labelledby="handoff-title" className="demo-dialog m-auto w-[min(34rem,calc(100vw-2rem))] p-6 text-base text-ink">
         <p className="eyebrow !text-amber">In this demo</p>
-        <h2 id="handoff-title" className="mt-1 font-display text-[1.75rem] font-medium leading-tight text-dusk">
+        <h2 id="handoff-title" className="display mt-1 text-[1.875rem] text-dusk">
           Continue on your phone
         </h2>
         <div className="mt-4">
