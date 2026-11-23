@@ -77,7 +77,7 @@ export default async function CalendarPage({ searchParams }: PageProps<"/practic
       )}
 
       <section className="panel mt-5 px-3 pb-4 pt-4 sm:px-5">
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex flex-col gap-3 min-[90rem]:flex-row min-[90rem]:items-center min-[90rem]:justify-between">
           <nav aria-label="Therapist" className="-mx-1 flex gap-2 overflow-x-auto px-1 py-1">
             {therapists.map((item) => (
               <Link
@@ -152,7 +152,7 @@ function WeekGrid({ week, today }: { week: WeekView; today: Day }) {
               <th
                 key={dayKey(day)}
                 scope="col"
-                className={`border-b border-l border-edge px-3 py-2.5 text-left font-bold ${isSameDay(day, today) ? "bg-accent-tint text-accent-deep" : "bg-paper"}`}
+                className={`whitespace-nowrap border-b border-l border-edge px-3 py-2.5 text-left font-bold ${isSameDay(day, today) ? "bg-accent-tint text-accent-deep" : "bg-paper"}`}
               >
                 {fmtDay(zonedTime(day, 12))}
                 {isSameDay(day, today) && <span className="ml-2 text-[0.9375rem] font-normal">today</span>}
