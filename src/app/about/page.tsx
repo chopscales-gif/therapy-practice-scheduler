@@ -107,8 +107,8 @@ export default function AboutPage() {
             </dd>
             <dt className="text-white/75">The other four demos</dt>
             <dd>
-              <a href="https://chopmedia.vercel.app" className={linkOnDark}>
-                chopmedia.vercel.app
+              <a href="https://haydenhuelskamp.vercel.app" className={linkOnDark}>
+                haydenhuelskamp.vercel.app
               </a>
             </dd>
           </dl>
