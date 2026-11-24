@@ -42,7 +42,7 @@ export function DemoBar({ clock, practice }: { clock: string | null; practice: P
     <div className="demo-chrome border-b border-[#eedfb5] bg-[#fdf6e2] text-[0.9375rem] text-ink">
       <div className="flex flex-wrap items-center gap-x-1 gap-y-1 px-4 py-2 sm:px-6">
         <p className="min-w-0 flex-1 basis-64 pr-3 leading-snug">
-          <a href="https://haydenhuelskamp.vercel.app/#therapy-practice" className="mr-3 whitespace-nowrap font-semibold underline decoration-ink/40 underline-offset-4 hover:decoration-ink">
+          <a href="https://haydenhuelskamp.com/#therapy-practice" className="mr-3 whitespace-nowrap font-semibold underline decoration-ink/40 underline-offset-4 hover:decoration-ink">
             ← All demos
           </a>{" "}
           <strong className="font-bold">Demonstration build.</strong>{" "}
